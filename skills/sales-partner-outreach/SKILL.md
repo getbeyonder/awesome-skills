@@ -170,10 +170,16 @@ after a yes. It is saved as a **draft** only; it never starts sending.
 
 - `name`, `listIds`, `channels`, `language`, `steps` (and sender ids from `senders.list` when the schema asks).
 - `reviewMode`: `auto` sends each message within the sender's limits; `manual` makes the person approve every
-  message in Dealmaker before it goes out. Default to `auto`: the person has already approved every text in
-  step 6. Offer `manual` for a first test run.
+  message in Dealmaker before it goes out. Use `auto`: the person has already approved every text in step 6.
+  Use `manual` only when the person explicitly asks for it, and only for an email-only campaign. With LinkedIn
+  steps, tell them manual review may leave LinkedIn messages waiting and never sent, and suggest `auto`.
+- **First test run:** suggest `auto` with one internal recipient (a colleague who agreed to it) instead of
+  `manual`.
 - `excludeFirstDegree` (default `true`) skips people already in the sender's 1st-degree LinkedIn network. Set
   it to `false` only when the person asks (for example an internal test with their own contacts).
+- **LinkedIn reach.** A `message` step without an `invite` before it reaches only people already in the
+  sender's 1st-degree network. For anyone else the sequence needs `invite` → `wait_accept` → `message`, and a
+  campaign with an `invite` step skips people who are already 1st-degree.
 - **Default sequence (option A): email first, then LinkedIn.** Email 1 (with the first line) → LinkedIn invite
   1 to 2 days later → follow-ups 1, 2 and 3 a few days apart. People with no valid email get the LinkedIn path
   only: invite → wait for the accept → first message → 3 follow-ups. No connected mailbox (check `senders.list`
@@ -196,8 +202,9 @@ The draft does nothing until the person acts. Give them the exact clicks, with t
    review".
 3. Press **Launch** (top right).
 
-With `reviewMode: "manual"` they also approve each message ("Approve this message") before it goes out. You
-cannot admit, launch or resume (`campaigns.resume` is person-only) and you do not try.
+With `reviewMode: "manual"` (email-only campaigns, see step 7) they also approve each message ("Approve this
+message") before it goes out. You cannot admit, launch or resume (`campaigns.resume` is person-only) and you do
+not try.
 
 ## 9. Replies and status
 
@@ -208,7 +215,7 @@ cannot admit, launch or resume (`campaigns.resume` is person-only) and you do no
 - **Status:** when the person asks (a daily check is a good habit), read `campaigns.get` (its state, and its jobs
   tools), `inbox.list` and `senders.list` (each sender's limits and what it used this week) and give short
   counts: sent, invites accepted, replies, what waits for the person (people to admit, launch, messages to
-  approve, replies to send). Do not promise to report on your own schedule.
+  approve in manual review, replies to send). Do not promise to report on your own schedule.
 - **Why nothing went out yet.** A newly connected LinkedIn account warms up with low daily limits at first (for
   example 2 invitations and 3 messages a day), and each sender works only in its schedule window (for example
   weekdays from 9:00 its local time). The first message may go out the next working morning. Check the people
