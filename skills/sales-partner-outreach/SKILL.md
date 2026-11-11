@@ -72,7 +72,7 @@ Ask once, in one message, only for what is missing. Do not invent any of these.
 | Offer | What a partner gets, for example a commission. A placeholder like `[commission]` is fine for now. |
 | Demo video link | A short demo (for example a Loom). "Later" is fine; use a placeholder until then. |
 | Booking link | A link where a partner books a call. If the person has none and the Booking app is on the board, offer to make one (step 10). |
-| Sender's postal address | Only when email is used. A valid physical postal address (street or a registered P.O. box): US law requires it in every commercial email to US recipients. Without it, no email steps (step 6). |
+| Mailbox for email | Only when email is used. A connected mailbox whose sender name and physical postal address are filled in Dealmaker (Settings → Senders); the person does this, there is no tool for it. US law requires the postal address in commercial email to US recipients. No email sender in `senders.list`: no email steps (step 7). |
 | How many | How many partners to look for in this run. |
 
 ## 2. Find people: `people.search`
@@ -159,9 +159,8 @@ Dealmaker signals and no fit score, so anything personal comes only from what yo
 - **First message + 3 follow-ups.** Short and plain. The ask is a short call. Use only the fields above, with a
   neutral fallback for an empty `{{custom.first_line}}`. Put the demo video and booking links where the person
   wants them (usually in answers to replies).
-- **Email:** subject under 60 characters. Every email carries a plain opt-out line and the sender's postal
-  address (step 1). Without an address, plan no email steps: use the LinkedIn path only and tell the person
-  why (US law requires the address in commercial email).
+- **Email:** subject under 60 characters. Do not write the postal address or an opt-out or unsubscribe line
+  in the text: Dealmaker appends the sender's name, postal address and an unsubscribe link to every email.
 - **LinkedIn:** connection invite with no note and no pitch; messages under 1,900 characters.
 
 ## 7. Draft campaign: `campaigns.create_draft`
@@ -176,9 +175,9 @@ after a yes. It is saved as a **draft** only; it never starts sending.
 - `excludeFirstDegree` (default `true`) skips people already in the sender's 1st-degree LinkedIn network. Set
   it to `false` only when the person asks (for example an internal test with their own contacts).
 - **Default sequence (option A): email first, then LinkedIn.** Email 1 (with the first line) → LinkedIn invite
-  1 to 2 days later → follow-ups 1, 2 and 3 a few days apart. People with no valid email (everyone, when
-  there is no sender postal address) get the LinkedIn path only: invite → wait for the accept → first message
-  → 3 follow-ups. Each step is
+  1 to 2 days later → follow-ups 1, 2 and 3 a few days apart. People with no valid email get the LinkedIn path
+  only: invite → wait for the accept → first message → 3 follow-ups. No connected mailbox (check `senders.list`
+  for an email sender): plan the LinkedIn path only for everyone and tell the person why. Each step is
   `{ type, delayDays, text?, subject?, fallbacks? }` with `type` one of the values the schema lists (such as
   `email`, `invite`, `wait_accept`, `message`). A wrong step is refused naming `steps[i]`: fix it and dry-run
   again.
