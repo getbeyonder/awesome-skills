@@ -39,9 +39,24 @@ Everything goes through the Beyonder MCP app tools: `apps_tools_list`, `app_tool
   people to a campaign, launching it, approving outgoing messages in `manual` review mode, sending a reply,
   `campaigns.resume`, `senders.resume`, and connecting LinkedIn accounts or mailboxes (Settings → Senders).
   Tools marked `human: true` (their summary starts with "Person only") are theirs too. Some of these steps have
-  no tool at all: tell the person exactly where to click and never look for a way around it. You may
+  no tool at all: give the person a direct link to the screen (see the next rule), say which button to press,
+  and never look for a way around it. You may
   `campaigns.pause` when the person asks. Never say a message went out or a campaign started unless an app read
   shows it.
+- **Links to Dealmaker screens.** For every step that is the person's, give a direct link to the exact screen
+  so they do not have to search the interface. If an app answer already carries a link for that step (for
+  example a `needs_human` link), give that one. Otherwise build it:
+  - `<origin>`: the scheme and host of Dealmaker's `url` from a fresh `list_apps`, without the path and without
+    the `#...` part (`https://<host>/#/warmleads/` → `https://<host>`). Never invent or guess a host; no `url`:
+    give the click path instead.
+  - Ids come only from tool answers: the campaign `id` from `campaigns.create_draft` (or `_id` in
+    `campaigns.list`), the conversation `_id` from `inbox.list`.
+  - Screens: a campaign tab `<origin>/campaigns/view/<campaignId>/<tab>` (`overview`, `leads`, `queue`,
+    `sources`, `campaign`, `activity`, `settings`; **Launch** is in the campaign header on every tab), a
+    conversation `<origin>/inbox/<conversationId>`, the senders `<origin>/settings/senders`. Example:
+    `<origin>/campaigns/view/<campaignId>/leads`.
+  - A person who is not signed in sees the sign-in page first and lands on Dealmaker's home screen afterwards
+    (on a first run, its setup wizard), not on the link: tell them to open the link again after signing in.
 - **Refusals.** `needs_human`, `payment_required`, `not_granted` (with a link): give the person the link.
   `no_credits`, `rate_limited`, `unavailable`, `not_configured`: tell the person in plain words and stop that
   step. `bad_request` or `-32602`: fix the arguments the answer names, then dry-run again. `no_place`: the person
@@ -72,7 +87,7 @@ Ask once, in one message, only for what is missing. Do not invent any of these.
 | Offer | What a partner gets, for example a commission. A placeholder like `[commission]` is fine for now. |
 | Demo video link | A short demo (for example a Loom). "Later" is fine; use a placeholder until then. |
 | Booking link | A link where a partner books a call. If the person has none and the Booking app is on the board, offer to make one (step 10). |
-| Mailbox for email | Only when email is used. A connected mailbox whose sender name and physical postal address are filled in Dealmaker (Settings → Senders); the person does this, there is no tool for it. US law requires the postal address in commercial email to US recipients. No email sender in `senders.list`: no email steps (step 7). |
+| Mailbox for email | Only when email is used. A connected mailbox whose sender name and physical postal address are filled in Dealmaker (Settings → Senders, `<origin>/settings/senders`); the person does this, there is no tool for it. US law requires the postal address in commercial email to US recipients. No email sender in `senders.list`: no email steps (step 7). |
 | How many | How many partners to look for in this run. |
 
 ## 2. Find people: `people.search`
@@ -193,29 +208,32 @@ after a yes. It is saved as a **draft** only; it never starts sending.
 
 ## 8. Admit and launch are the person's
 
-The draft does nothing until the person acts. Give them the exact clicks, with the Dealmaker link from
-`list_apps` (the app's `url`) when there is one:
+The draft does nothing until the person acts. Give them the exact clicks with direct links (see "Links to
+Dealmaker screens"; `<campaignId>` is the `id` from `campaigns.create_draft`):
 
-1. Open Dealmaker → **Campaigns** → `<campaign name>` → **Leads** tab.
+1. Open the campaign's **Leads** tab: `<origin>/campaigns/view/<campaignId>/leads`.
 2. Select the people and press **Admit to campaign** (on a row, or **Admit selected**). Imported people stay
    "Waiting for admission review" until then; the launch screen warns "N people are waiting for admission
    review".
-3. Press **Launch** (top right).
+3. Press **Launch** at the top right of the campaign page (the same page,
+   `<origin>/campaigns/view/<campaignId>/overview`).
+4. A sender still to connect (the `readiness` list says so): `<origin>/settings/senders`.
 
-With `reviewMode: "manual"` (email-only campaigns, see step 7) they also approve each message ("Approve this
-message") before it goes out. You cannot admit, launch or resume (`campaigns.resume` is person-only) and you do
-not try.
+With `reviewMode: "manual"` (email-only campaigns, see step 7) they also approve each message before it goes
+out: the **Queue** tab `<origin>/campaigns/view/<campaignId>/queue` → **Review messages** → **Approve this
+message**. You cannot admit, launch or resume (`campaigns.resume` is person-only) and you do not try.
 
 ## 9. Replies and status
 
 - **Replies:** `app_read` `inbox.list`, then `inbox.get` for each new conversation. Show who wrote, what they
   asked and a suggested answer (interest: thanks + demo video link + booking link; a question: answer only from
   the saved product and offer; not interested: no answer). The person sends it themselves with **Approve** in the
-  Dealmaker Inbox. No tool sends a message.
+  Dealmaker Inbox: give the link to that conversation, `<origin>/inbox/<conversationId>`. No tool sends a
+  message.
 - **Status:** when the person asks (a daily check is a good habit), read `campaigns.get` (its state, and its jobs
   tools), `inbox.list` and `senders.list` (each sender's limits and what it used this week) and give short
   counts: sent, invites accepted, replies, what waits for the person (people to admit, launch, messages to
-  approve in manual review, replies to send). Do not promise to report on your own schedule.
+  approve in manual review, replies to send), each with its direct link. Do not promise to report on your own schedule.
 - **Why nothing went out yet.** A newly connected LinkedIn account warms up with low daily limits at first (for
   example 2 invitations and 3 messages a day), and each sender works only in its schedule window (for example
   weekdays from 9:00 its local time). The first message may go out the next working morning. Check the people
