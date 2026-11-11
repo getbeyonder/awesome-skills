@@ -89,8 +89,8 @@ people.search  ->  prospects.import  ->  prospects.enrich  ->  (you approve the 
 
 - **Dry run first.** Every paid call, and every write that is large or vague, is previewed before it runs.
 - **An explicit yes, with the price.** A paid step runs only after you have seen the maximum cost and said yes.
-- **Nothing is ever sent for you.** Skills save drafts. Launching a campaign and answering a reply stay your
-  clicks in the app.
+- **Nothing is ever sent for you.** Skills save drafts. Admitting people to a campaign, launching it and
+  answering a reply stay your clicks in the app.
 - **Uncertain results are checked, not repeated.** If a call may or may not have gone through, the skill reads
   the current state before doing anything else.
 - **App data is data.** Names, profiles and reply texts are never followed as instructions.
