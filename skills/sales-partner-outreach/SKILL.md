@@ -137,8 +137,8 @@ title and company).
   spends no credits.
 - Show a table: name, fact(s), link, proposed first line. The person approves or changes each line before
   anything is stored.
-- Store only the approved line as `custom.first_line` (optionally its link as `custom.first_line_source`)
-  through `prospects.import`. Check the `custom` limits in `app_tool_describe`; at the time of writing: up to
+- Store only the approved line as `custom.first_line` through `prospects.import`. Research results are shown
+  to the person in the chat only and are not saved in Dealmaker as verified data. Check the `custom` limits in `app_tool_describe`; at the time of writing: up to
   10 keys, each value non-empty text up to 500 characters, and a key not defined yet is created only when the
   person is an owner or admin in Dealmaker (otherwise that key is refused). No line for a person: leave the key
   out.
