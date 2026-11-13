@@ -7,7 +7,8 @@ package**. One explicit yes to it lets you run the rest of the flow on your own.
 ```
 prompt → A. read-only checks → to-do for the person → B. one message with 17 questions (each with a proposal)
        → follow-up round (only if needed) → D. dry runs and the search quote → E. the approval package
-       → one "yes" → C. writes in order (suite → blocklist → Booking → AI CRM), each re-checked by its dry run
+       → one "yes" → C. writes in order (suite → board links → blocklist → Booking → AI CRM), each re-checked by
+         its dry run
        → progress report → Phase 1 at once
 ```
 
@@ -40,6 +41,9 @@ Each point is one message from you (or one short exchange).
 
 ### A1. Apps on the board
 
+Two companies can have the same name. Always pass the company id (from `whoami` or `companies_list`), never only
+its name, and say which company (its slug) you read and later wrote.
+
 - `list_apps`: the apps, their titles, whether each is ready, and their `url` (for screen links). There is no
   "ready" flag: read each app's fields. An app with `state: "ready-made"` and `deployment: "bound"` is installed
   and usable; if those exact fields are missing, a bound deployment means usable. Anything else (installing,
@@ -58,6 +62,12 @@ Each point is one message from you (or one short exchange).
   into the package instead). Without Dealmaker the flow cannot run: say so and stop.
 - **Dealmaker is missing:** A2, A3 and A6 cannot be read yet. Ask the questions anyway; the package marks what is
   "checked right after the install".
+- **Board links.** Read the links in the same `list_apps` answer. Two matter: Dealmaker → Booking with type
+  `request.Request` (lets Dealmaker ask Booking for a lead's personal booking link) and Booking → Dealmaker with
+  types `core.Person`, `core.Event` (lets Dealmaker learn who booked). A link that is only "proposed" is not on
+  (`link_status` answers `not_found` for it). Both on: say so; nothing to do. One missing, only proposed, or
+  missing a type: it goes into D1 and the package. An app is missing: the suite's dry run shows which links it
+  switches on; only the rest go into D1.
 
 ### A2. Sending accounts
 
@@ -84,7 +94,10 @@ only for now." Draft Q8 as LinkedIn only.
 
 ### A4. Booking: calendar, meeting type, hours
 
-- `list_calendars`: `connected: true` is enough.
+- `list_calendars`: `connected: true` is enough. `connected: true` with `listError: "scopes_short"` (and
+  `calendars: null`) is fine too: busy times are read and meetings written on the calendars named in `read` and
+  `write`; only Booking cannot list the person's other calendars to choose from. Not a to-do; an optional note:
+  to choose other calendars, reopen the `connect_calendar` link and allow all permissions.
 - Not connected: `connect_calendar` (a read; it only makes the person's own link). `available: false`: the
   platform's Google connection is not set up for this Booking; free times then ignore the calendar (a note, not a
   to-do). No link comes back (the host blocked the call, or a refusal): never retry around a host's denial; the
@@ -102,18 +115,21 @@ only for now." Draft Q8 as LinkedIn only.
 `list_pipelines`: the partner pipeline, its stages with ids, and `meetingStages`. Usually it logs meetings but does
 not move the deal on booking until `meetingStages` is set (Q16).
 
-`meetingStages` is per pipeline: it moves only deals that are in that pipeline. Before you propose a deal move, find
-out which pipeline a Booking guest's deal lands in: read it if a tool shows it (for example a default pipeline in
-`list_pipelines`), else ask it in Q16. Propose the move on that pipeline. A rule on another pipeline (or on a new
-one) does not fire for booked deals that land elsewhere; say so.
+`meetingStages` is per pipeline: it moves only deals that are in that pipeline. No tool shows which pipeline a
+Booking guest's deal lands in (`list_pipelines` has no default flag), so never assume one. Q16 says so: "I can't see
+which pipeline a booked guest's deal lands in; a move on a new pipeline may never fire." and offers two choices: no
+move (meetings are still logged on the contact), or a move on the pipeline the person names.
 
 ### A6. Company profile (only when a campaign already exists)
 
 `campaigns.list`; if there is a campaign, `knowledge.get` with its id, and read only `company`. The profile is
 workspace-wide, so any campaign will do. An empty `companyName` or `description` goes on the to-do: Dealmaker's AI
-writer writes nothing without it. Not empty: once Q1 is answered, compare the description with it. It describes a
-different product: suggest updating it (`<origin>/settings/workspace`) and put that on the Launch to-do, since the AI
-writer uses it in every message. No campaign: skip; Outreach checks it.
+writer writes nothing without it. Not empty: once Q1 and Q2 are answered, compare all of `company` with them, not
+only the name and description: `callToAction`, `capabilities` and `proof` go into the AI writer's messages too.
+Something describes a different product: suggest updating it (`<origin>/settings/workspace`) and put that on the
+Launch to-do, since the AI writer uses it in every message. The call to action conflicts with the offer (e.g. a free
+trial or free credits for another product): put it on the to-do, and add that promise to the never-say lines (Q4).
+No campaign: skip; Outreach checks it.
 
 ### A7. The to-do
 
@@ -135,8 +151,12 @@ Only what is really missing, numbered, in one message, each with what to open, w
   I'll fetch the direct link again before the first booking link."
 - **Empty company profile:** "Fill in your company's name and a short description in Dealmaker:
   <origin>/settings/workspace → Company information. Dealmaker's AI writes no message without them."
-- **Company profile describes another product** (after Q1): "Your company profile in Dealmaker describes <...>, not
-  <product>. The AI uses it in every message; please update it: <origin>/settings/workspace → Company information."
+- **Company profile describes another product** (after Q1, Q2; any of its fields, including the call to action,
+  capabilities and proof): "Your company profile in Dealmaker describes <...>, not <product>. The AI uses it in
+  every message; please update it: <origin>/settings/workspace → Company information."
+- **Its call to action conflicts with the offer** (e.g. "<a free trial of another product>"): "Your company profile
+  asks people to <...>, which is not what we offer partners. The AI may use it in messages; please change it on the
+  same screen. I also add that promise to the never-say lines."
 
 End with: "You can do these now or later, any time before Launch; just tell me 'done'. I check again before the step
 that needs each one."
@@ -177,20 +197,26 @@ C. Channels
     Or do you want to approve every message yourself? (Then anything you don't approve in time is not sent,
     which can leave LinkedIn messages unsent.)
 D. Conversation
-12. When a partner replies, should the AI draft the answer only from your product, offer and FAQ?
-    (You switch it on at launch; you approve every reply.)
+12. When a partner replies, the AI drafts the answer only from your product, offer and FAQ.
+    I suggest on for a test run. You switch it on yourself at launch, after I save the knowledge base;
+    you approve every reply. OK, or off?
 13. If a partner goes quiet, draft a nudge after 3 days and one after 7 (you approve each)?
     I suggest no for the first run.
 E. Calls
 14. You take the calls, Mon-Fri 10:00-17:00 in your time zone (<zone from Booking>).
     <If Booking says UTC: Booking shows UTC, which is probably not set yet; your sending account says <zone>.
-    Which city are you in?> You connect your Google calendar yourself. OK?
+    Which city are you in?>
+    <Zone 5+ hours from New York: Partners are in the US. I suggest Mon-Fri <15:00-19:00> your time
+    (= 9:00-13:00 New York, 6:00-10:00 Los Angeles). I check both and show both in the package.>
+    You connect your Google calendar yourself. OK?
 15. Partners book "<Partner intro call>": 30 min, video, the form asks about their clients and the topic. Keep it?
     <Only a generic type exists: Reuse your "<Intro call>" for partners, or create "Partner intro"? I suggest
     creating it.>
-16. When a partner books, move their deal in AI CRM to "<Call booked>", and to "<Call held>" after the call?
-    <Booked deals land in "<pipeline>" | Which AI CRM pipeline do booked deals land in?>
-    <No fitting pipeline: or create a new pipeline "<Partners>" with these stages?>
+16. I can't see which AI CRM pipeline a booked guest's deal lands in; a move on a new pipeline may never fire.
+    So: no move (meetings are still logged on the contact), or name the pipeline and I move the deal there
+    to "<Call booked>" when a partner books, and to "<Call held>" after the call?
+    <No fitting pipeline: or create "<Partners>": New partner → Call booked → Call held → Signed (won)
+    → Not a fit (lost); it fires only if booked deals land there.>
 F. Money
 17. For <25> people the whole run costs about <1,550> credits (~$<23.25>).
     Your budget, a hard ceiling: <1,700> credits (~$<25.50>)? I spend within it without asking again,
@@ -212,30 +238,42 @@ F. Money
 | 9 Accounts | The connected accounts from A2; if several people's are visible, list them and ask which are theirs | One LinkedIn account; for email one or more mailboxes; each connected with no `personStep`, or on the to-do. "Use a colleague's LinkedIn" fails: a campaign uses only its owner's accounts. | Prospect, Enrich, Research can run; Outreach stops and asks | `create_draft` `linkedinSenderId`, `emailSenderIds` |
 | 10 Name | Name from Q5 and Q8. Texts are always in English (Dealmaker's AI writes English only). | Name 1-150 characters. | The proposal | `create_draft` `name` |
 | 11 Review mode | `auto`: each written text goes out when due, without per-message approval | `auto` or `manual`. With `manual` the person approves every message on the Queue tab; a text not approved in time is not sent, which can leave LinkedIn messages unsent; that adds a step to the Launch moment. "You approve them for me" fails: only the person approves. | `auto` (the package shows it plainly) | `create_draft` `reviewMode` |
-| 12 AI dialogue | A question; say what on and off mean | Yes or no. Yes needs a saved knowledge base, which you save right after the campaign is created. | Off | The launch hand-off, link 1 |
+| 12 AI dialogue | On for a test run; say what on and off mean. The switch stays the person's, at Launch, after the knowledge base is saved | Yes or no. Yes needs a saved knowledge base, which you save right after the campaign is created. "ok" (also "ok" to all) keeps on; only an explicit "off" is off. | The proposal (on); the package says so | The package's "AI dialogue" line; the launch hand-off, link 1 |
 | 13 Nudges | No for a first run | Yes or no. At most 2 per silence, 4 per conversation. | Off | The launch hand-off, link 1 |
-| 14 Calls | Hosts from the meeting type (`you: true`), weekdays, office hours, the time zone from `get_schedule`; "UTC" there is probably unset: cross-check the sender's `timezone` from `senders.list` and ask for the city (also when there is no zone) | Each host an active admin or member of Booking (`list_members` for another person); 1-20 hosts; days 1 (Mon) to 7 (Sun), `HH:MM`, from before to; a real IANA zone. Only a Booking admin changes another member's hours. The calendar is always each host's own step. | Booking keeps its hours; no hours change in the package | D3 / C3 `set_schedule`; `create_type` / `update_type` `hosts` |
+| 14 Calls | Hosts from the meeting type (`you: true`), weekdays, office hours, the time zone from `get_schedule`; "UTC" there is probably unset: cross-check the sender's `timezone` from `senders.list` and ask for the city (also when there is no zone). The zone is 5+ hours from US Eastern: also propose a window that overlaps 9:00-13:00 New York, in their zone (today's offsets) | Each host an active admin or member of Booking (`list_members` for another person); 1-20 hosts; days 1 (Mon) to 7 (Sun), `HH:MM`, from before to; a real IANA zone. Only a Booking admin changes another member's hours. The calendar is always each host's own step. | Booking keeps its hours; no hours change in the package | D3 / C3 `set_schedule`; `create_type` / `update_type` `hosts` |
 | 15 Meeting type | The type A4 found whose name or slug contains "partner" ("Keep it?"); only another type exists: "reuse '<existing type>' or create 'Partner intro'"; else propose: "Partner intro call", slug `partner-intro`, 30 min, video, two form questions (clients; topic) | `name` and `slug` (lowercase letters, digits, dashes, 1-50); `durationMin` 5-720; `location.kind` video, phone, address or custom; at most 10 questions with a lowercase `key`, a `label`, a `type`. No `price` or refund window: those are the person's. | The existing type; if missing, the proposal | D3 / C3 `create_type`; the personal booking links |
-| 16 Deal move | The "call booked" / "call held" stages of the pipeline booked deals land in (A5; ask if unknown); no fitting pipeline: a new one ("New pipeline" in D4 / C4) | Each stage exists, or is in the new pipeline's plan; booked deals land in that pipeline (else its rules never fire: say so); a stage with required fields is refused; only an AI CRM admin may change it | No move; meetings are still logged | D4 / C4 `save_pipeline` (`meetingStages`; no `id` for a new pipeline), `save_pipeline_stage` |
+| 16 Deal move | No move, since no tool shows where booked deals land (A5); or the "call booked" / "call held" stages of the pipeline the person names; no fitting pipeline: a new one with `standard: false` and explicit stages, e.g. New partner → Call booked → Call held → Signed (won) → Not a fit (lost), with no required fields on "Call booked" and "Call held" ("New pipeline" in D4 / C4) | Each stage exists, or is in the new pipeline's plan; a move fires only for deals in that pipeline (say so); a stage with required fields is refused for `meetingStages` (standard stages can carry them); only an AI CRM admin may change it | No move; meetings are still logged | D4 / C4 `save_pipeline` (`meetingStages`; no `id` for a new pipeline), `save_pipeline_stage` |
 | 17 Budget | A hard ceiling a little above the plan for Q7 (about 10% headroom): search ~28, emails ~29, research ~5 credits a person (leave out emails for LinkedIn only) | A number. Dollars become credits at about $0.015 a credit, shown back. Below the plan: say what fits and propose a smaller count or LinkedIn only. "No limit" fails: the package needs a ceiling. | The proposal | The package's budget; the ledger; never sent to a tool |
 
 Defaults you do not ask about (the package shows them): look up emails for everyone found without one; research
 the whole list; news from the last 12 months; no test run to a colleague. The person may ask for one: if
 `lists.list` shows an existing internal one-person list (a test receiver), ask in Setup whether to reuse it; else
-the package lists a new one-person test list. Either way the test gets its own small draft. With LinkedIn steps,
-people already connected to the sender are left out by default, so a colleague who is already a connection gets
-nothing on LinkedIn: the package says so and offers to include connections for the test draft only.
+the package lists a new one-person test list. Either way the test gets its own small draft. A test draft from an
+earlier run (`campaigns.list`) is kept as it is and a fresh one is made, unless the person says to reuse it. With
+LinkedIn steps, people already connected to the sender are left out by default, so a colleague who is already a
+connection gets nothing on LinkedIn: the package says so. It also offers to include connections for the test
+draft only: a test draft with no invite step (message first) and `excludeFirstDegree: false` (`outreach.md`,
+section 2); otherwise it says the LinkedIn part is not tested. LinkedIn only, no mailbox, the test person already a
+connection and connections not included: the test sends nothing at all; the package says so.
+After the test draft is made, Outreach checks whether the test person was left out and tells the person.
 
 ## Step D. Dry runs before the package
 
 Everything the package will promise is checked first, so the package shows real results, not guesses. Each call
 here is a read or a dry run: nothing changes and nothing is paid. Run only what the answers need.
 
-### D1. Suite install (only if apps are missing)
+### D1. Suite install (only if apps are missing) and board links
 
 `suite_install` with `dry_run: true`. Note what it would install, which links between the apps it would switch on,
 and, for apps archived before, the person's restore-or-fresh answer from Step B. `needs_owner` or `payment_required`:
 the install is the owner's step; give the link, leave the suite out of the package and say what cannot run.
+
+Each board link A1 found missing (and the suite does not switch on): `connect` with `dry_run: true` and an explicit
+`things` list: `["request.Request"]` for Dealmaker → Booking, `["core.Person", "core.Event"]` for Booking →
+Dealmaker. Without `things`, `connect` can be refused with a conflict because of a blank proposed link. Note what it
+would switch on. Already on ("nothing to do"): say so; it stays out of the package. A refusal or `needs_owner`: the
+link is the owner's step; give the link and say what it means (no personal links from Dealmaker, or Dealmaker does
+not learn who booked).
 
 ### D2. Blocklist (only if Q6 named values)
 
@@ -252,7 +290,8 @@ before the package.
   non-admin is refused: only a Booking admin can create it; it goes into the package as the person's step instead.
 - Hours changed by Q14: `set_schedule` with `dry_run: true` (`timezone`, `weekly` for the whole week,
   `overrides`). Note the new hours, today's hours, and `bookedOutside` (meetings already booked outside the new
-  hours; they stay booked).
+  hours; they stay booked). Zone 5+ hours from US Eastern: dry-run both the person's usual hours and the window that
+  overlaps 9:00-13:00 New York, and note each with its New York and Los Angeles times.
 
 ### D4. AI CRM deal move (only if Q16 is yes)
 
@@ -261,9 +300,12 @@ before the package.
 are). If it gives no preview of its own, the exact change is the preview.
 
 **New pipeline** (Q16 chose one): `save_pipeline` without `id` creates it, with the standard stages unless
-`standard: false`. Its dry run returns only the platform's generic preview, no app preview: the preview is the
-exact name and stages you will send. `save_pipeline_stage` needs the new `pipelineId`, and `meetingStages` can only
-be set as a change on an existing pipeline, so neither can be dry-run before the pipeline exists. The package shows
+`standard: false`. Standard stages can carry required fields, and a stage with required fields is refused for
+`meetingStages`, so use `standard: false` with explicit stages (e.g. New partner → Call booked → Call held → Signed
+(won) → Not a fit (lost)), where "Call booked" and "Call held" have no required fields. Its dry run returns only the
+platform's generic preview, no app preview: the preview is the exact name and stages you will send.
+`save_pipeline_stage` needs the new `pipelineId`, and `meetingStages` can only be set as a change on an existing
+pipeline, so neither can be dry-run before the pipeline exists. The package shows
 the name, the planned stages and the deal move, and marks the stages and the deal move "checked right after
 creation".
 
@@ -280,13 +322,17 @@ filters, not `listName` / `listId`: check those against the `args` you sent). Se
 - Search: the quote(s) from D5.
 - Emails (email + LinkedIn only): the number of people × about 29 credits per email found (the typical ceiling; the
   real quote needs the people, so it comes in Enrich).
-- Research: the number of people × about 5 credits.
+- Research: the number of people × about 5 credits. Better: when the workspace already has a prospect (e.g. the
+  test person; `prospects.search`), a `prospects.research` dry run on that one id is free and gives the real price
+  per person; use it instead of the rule of thumb (converted as in SKILL.md, "Prices", if it carries only cost
+  fields). That person is often already researched (cached), so a plain dry run answers `nothing_to_do` with no
+  price: then dry-run again with `force: true` (still free) to get the price.
 - The sum is the estimate. It must fit under the budget (Q17); if not, propose less before the package.
 
 ### Dealmaker missing (the suite is in the package)
 
-D2 and D5 cannot run before the install. The package shows those lines from the answers and marks them "checked
-right after the install". After the yes and the install, run them; any result that differs from the package (a value
+D2, D5 and the board links the suite does not switch on cannot run before the install. The package shows those
+lines from the answers and marks them "checked right after the install". After the yes and the install, run them; any result that differs from the package (a value
 refused, a quote more than 25% above the typical price, no connected account) is a stop.
 
 ## Step E. The approval package
@@ -301,15 +347,22 @@ WHAT I SET UP NOW
 Board          Dealmaker, AI CRM, Booking: on the board
                | install the suite "<title>": <apps>, and switch on <links between them>. Free.
                  (dry run: <what it would install; restore or start fresh>)
+Board links    Dealmaker → Booking (personal booking links) and Booking → Dealmaker (who booked): already on
+               | switch on <Dealmaker → Booking | Booking → Dealmaker> (dry run OK). Free.
 Skip list      block <acme.com, beta.io> in Dealmaker, so no campaign reaches them | none
 Booking        meeting type "<name>" at /b/<slug>: <30> min, video, hosted by <you>, <2> questions on the form
                (dry run OK) | keep "<name>"
                your hours: <Mon-Fri 10:00-17:00, zone> (today: <...>; <n> booked meetings fall outside and stay
                booked) | unchanged
-AI CRM         pipeline "<name>" (booked deals land here): when a partner books or reschedules, the deal moves
-               to "<stage>"; after the call is held, to "<stage>"
+               <zone 5+ hours from New York: both, each dry run OK:
+                 a) <Mon-Fri 15:00-19:00, zone> = 9:00-13:00 New York, 6:00-10:00 Los Angeles (my proposal)
+                 b) your usual <Mon-Fri 10:00-17:00> = <4:00-11:00> New York, <1:00-8:00> Los Angeles
+                 "yes" sets a); say "b" for your usual hours>
+AI CRM         pipeline "<name>" (the one you named): when a partner books or reschedules, the deal moves
+               to "<stage>"; after the call is held, to "<stage>". It fires only for deals in that pipeline.
                | create the pipeline "<name>" with stages <...>, then the same deal move (dry run: create only;
-                 stages and deal move checked right after creation) | no move (meetings are still logged)
+                 stages and deal move checked right after creation; it fires only if booked deals land there)
+               | no move (meetings are still logged on the contact; I can't see where booked deals land)
 
 WHO I FIND
 People         <seniority> of <partner type> in <US place>, <size bands>, <keywords>
@@ -335,8 +388,14 @@ Review mode    auto: each written message goes out when due, without your approv
                (manual would mean you approve every message on the Queue tab; anything not approved in time is
                not sent, which can leave LinkedIn messages unsent.)
 Test run       none | one test to <colleague> first, from the list "<existing test list>" | a new one-person list
+               in a fresh test draft <(the earlier test draft "<name>" stays as it is) | reusing "<name>">
                <With LinkedIn steps: if <colleague> is already your LinkedIn connection, the test skips them and
-               sends nothing on LinkedIn; I include connections for the test draft only | they are not connected>
+               sends nothing on LinkedIn; <I include connections for the test draft only: no invitation step,
+               the message goes first | so the LinkedIn part is not tested> | they are not connected>
+               <LinkedIn only, no mailbox, already connected: the test sends nothing at all.>
+               After making it I check whether <colleague> was left out, and tell you.
+AI dialogue    on for a test run: you switch it on at Launch, after I save the knowledge base; you approve every
+               reply | off
 Knowledge base saved right after the campaign is created; the AI uses it to draft replies. <Placeholders
                still open: <[commission], ...>; saved without them until you give the real terms.>
                Product:    <text>
@@ -386,13 +445,13 @@ Answer "yes" to run it all, or tell me what to change.
 
 ## Step C. The writes, right after the yes
 
-In this order, one at a time, only those the package lists: **C1 suite → C2 blocklist → C3 Booking type and hours
-→ C4 AI CRM.** No new question per write. But each write first runs its dry run again (or re-reads the state for a
+In this order, one at a time, only those the package lists: **C1 suite → C1b board links → C2 blocklist → C3
+Booking type and hours → C4 AI CRM.** No new question per write. But each write first runs its dry run again (or re-reads the state for a
 tool with no preview), and you compare it with the package:
 - **The same:** the real call with the same `args` (`confirmed` / `retryKey` if the schema lists them). Read the
   state back.
-- **Already there** (a value already blocked, a meeting type the suite made that matches the package): skip it and
-  say so in the report.
+- **Already there** (a value already blocked, a meeting type the suite made that matches the package, a board link
+  already on): skip it and say so in the report.
 - **Different** (another value, another stage, a host or length the package did not show, a preview with
   `bookedOutside` the package did not mention, a refusal): stop. Say in plain words what differs and ask. Writes
   already done stay done; nothing after the stop runs until the person answers.
@@ -403,6 +462,12 @@ tool with no preview), and you compare it with the package:
 `needs_owner` or `payment_required`: give the link and stop. Then run what could not run before (A2, A3, A6, D2, D5) and compare with
 the package. A template suite may add a meeting type and a partner pipeline by itself: use them when they match the
 package; if they differ (another length, other stages), ask.
+
+### C1b. Board links (only if the package switches one on)
+
+After any suite install: `list_apps` again. A link now on (the suite switched it on): nothing to do; say so.
+Otherwise `connect` with `dry_run: true` and the same explicit `things` as in D1, compare with the package, then the
+same call without `dry_run`. Read `list_apps` again and confirm the link is on with those types.
 
 ### C2. Blocklist (only if the package names values)
 
@@ -415,8 +480,8 @@ block is the person's.
 
 - `create_type` (or `update_type` with `hosts`) without `dry_run`, after the fresh dry run matched. Report: "Booking
   now has the meeting type '<name>' at /b/<slug>. You can change or switch it off in Booking."
-- `set_schedule` after its fresh dry run matched (a new `bookedOutside` the package did not show is a difference).
-  Report the new hours.
+- `set_schedule` after its fresh dry run matched (a new `bookedOutside` the package did not show is a difference),
+  with the window the yes chose (the proposal, or the usual hours if the person said "b"). Report the new hours.
 
 ### C4. AI CRM deal move (only if the package sets it)
 
@@ -428,8 +493,10 @@ pipeline already made stays):
 1. `save_pipeline` without `id` (its dry run again first), then `list_pipelines`: read the new pipeline's id and the
    stages it got.
 2. Each stage the package adds or renames: `save_pipeline_stage` with that `pipelineId`, dry run, compare, real call.
-3. `save_pipeline` with the new `id` and `meetingStages`, dry run, compare, real call.
-4. `list_pipelines` again and confirm the stages and the deal move.
+3. `save_pipeline` with the new `id` and `meetingStages`, dry run, compare, real call. A `standard: false` pipeline
+   is created without a starting stage: when `list_pipelines` shows none or a wrong one, set it in this same call
+   to "New partner" (e.g. `defaultStageId`; take the exact field name from the tool's schema, never guess it).
+4. `list_pipelines` again and confirm the stages, the starting stage and the deal move.
 
 ## Continuing in a new chat
 

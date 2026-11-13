@@ -37,10 +37,14 @@ The one-person list the package named: an existing internal test list from `list
 one, else a new list with the one colleague (`prospects.import`). Then a separate small draft with the same
 templates and steps, made before the main draft. With LinkedIn steps, `excludeFirstDegree: true` (the default)
 leaves out a colleague already connected to the sender, and the test sends nothing on LinkedIn. If the package says
-to include connections, set `excludeFirstDegree: false` on the test draft only (and only when the tool's description
-says connected people then get the messages, as in section 5); otherwise say plainly that the LinkedIn part is not
-tested. There is no "email only" fallback when no mailbox is connected. The test gets a launch hand-off of its own
-first; the main hand-off comes when the person says the test looked right.
+to include connections: for a 1st-degree test person, a test draft with no invite step (message first) and
+`excludeFirstDegree: false`, on the test draft only. If the dry run refuses it, or the package does not include
+connections, say plainly that the LinkedIn part is not tested. There is no "email only" fallback when no mailbox is connected. A test draft from an earlier run stays as
+it is: make a fresh one, unless the person said to reuse it. After making the test draft, read `prospects.search`
+for the test list with the state for "excluded as 1st-degree connection" (take the exact value from the tool's
+schema; never guess it; no such state: say you cannot check it) and tell the person whether the test person was
+left out. The test gets a launch hand-off of its own first; the main hand-off comes when the person says the test
+looked right.
 
 ## 3. People without a usable email
 
@@ -89,8 +93,9 @@ the report. Then the offer reaches the first messages only through the company p
 real call. It never sends and never launches.
 
 Arguments (check the schema): `name` (1-150), `listIds`, `channels` (`email`, `linkedin`), `linkedinSenderId`,
-`emailSenderIds` (the person's own, from section 1), `language: "en"` (always: the AI writes English only; the field is kept for compatibility), `tone` (`professional` default), `goal`
-(`conversations` default), `reviewMode` (the package), `excludeFirstDegree`, `steps` (1-12, in order).
+`emailSenderIds` (the person's own, from section 1), `language: "en"` (always, whenever the schema lists `language`,
+even as optional: the AI writes English only; leave it out only when the schema has no such field), `tone`
+(`professional` default), `goal` (`conversations` default), `reviewMode` (the package), `excludeFirstDegree`, `steps` (1-12, in order).
 
 Step fields: `type` (`email`, `invite`, `wait_accept`, `message`, `visit`), `delayDays` (0-60 after the previous
 step), `mode: "ai"` with a `templateId` whose `kind` fits (email → email; message → icebreaker or follow_up; invite
@@ -111,7 +116,8 @@ message   +7     ai  LinkedIn follow-up
 **LinkedIn only:** `invite` day 0 → `wait_accept` 14 → `message` +1 (opener) → +4 → +7 (follow-ups).
 
 - A LinkedIn `message` reaches only people who accepted the invitation (or are already connected), so LinkedIn always
-  starts with `invite` → `wait_accept`. A message before the invitation is refused.
+  starts with `invite` → `wait_accept`. A message before the invitation is refused. (The one exception: a test
+  draft for a colleague already connected, section 2.)
 - **1st-degree connections.** `excludeFirstDegree: true` (default) leaves people already connected to the sender
   out of the campaign. Set `false` only if the package said to include the person's own connections, and only when
   the tool's description says such people then skip the invitation and get the messages; an older Dealmaker
@@ -140,8 +146,9 @@ The package's yes covers it: no question.
      offer's numbers), and say in the report exactly what you cut.
    - **No placeholders:** a term still in brackets (`[commission]`, ...) is left out, never saved; the hand-off
      keeps "replace the placeholders with real terms" on the to-do, and you save the real terms when they come.
-   - **No links**, email addresses, phone numbers or sensitive data: take them out. **Never send `loomUrl`,
-     `bookingUrl`, `aiDialogue` or a booking type**, even if an older schema lists them.
+   - **No links**, email addresses, phone numbers or sensitive data: take them out. **Never send a link field
+     (`loomUrl`, `bookingUrl`, any other URL field), `aiDialogue` or a booking type**, even if an older schema lists
+     them.
 3. `knowledge.save` with `dry_run: true` (if the tool supports it): `campaignId`, `expectedRevision` (the `revision`
    just read), and only the fields that change (`faq` and `neverSay` replace the whole list). The `changes` match the
    package (apart from cuts you reported): the same call without `dry_run`. Two campaigns: save it to each.
@@ -222,6 +229,13 @@ the status message. A change of tone, angle or offer that the package did not co
 An edit **never approves**. A text the person already approved is theirs (refused). A text already sent cannot be
 changed. `needs_edit` with `BUSINESS_PROFILE_MISSING` on every text: the company profile is empty; give the person
 `<origin>/settings/workspace`.
+
+`needs_edit` with `invalidReason: provider_error` (often every first AI message at once, right after Launch, with an
+empty text; the invite step `ready`, follow-ups `preparing`): Dealmaker's AI writer could not reach its model. It is
+an app or platform problem, not the person's data. Tell the person plainly: invitations still go out, but anyone who
+accepts gets no first message until the text is written; ask them to report it to whoever runs their Dealmaker or
+Beyonder. Do not write the text yourself with `campaigns.messages.edit` (Dealmaker's AI writer writes these texts),
+and no tool makes it write again. Read `campaigns.messages.list` again on the next status.
 
 With manual review, end with the Queue link: "<n> messages wait for your approval: <links.queue> → each person's
 'Review messages' → 'Approve' or 'Approve selected'."

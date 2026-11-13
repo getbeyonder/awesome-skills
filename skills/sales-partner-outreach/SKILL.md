@@ -65,7 +65,10 @@ A stop is not the end: after the person's answer, go on from where you stopped.
   references are a guide; the schema wins. Never guess a name.
 - **A tool is missing** (not in `apps_tools_list`, or its schema lacks what a step needs): say so plainly, skip
   that part, and give the person the Dealmaker, Booking or AI CRM screen where they can do it by hand. Never look for
-  a way around it. Different boards run different app versions, so this happens.
+  a way around it. Different boards run different app versions, so this happens. An older Dealmaker may have no
+  `prospects.enrichStatus` (read `prospects.get` instead), may still list link fields in `knowledge.save` (never
+  send them, even if listed), or may still take `language` in `campaigns.create_draft` (always pass `"en"` if the
+  field exists).
 - **The approval package is the yes.** Only one explicit yes to the package, given after the package was shown,
   counts. A yes given earlier (in the prompt, to the questions), "yes, but ..." (change the package and show it
   again) and a host's approval prompt (a second guard) do not. The yes covers exactly what the package lists, in
@@ -75,12 +78,17 @@ A stop is not the end: after the person's answer, go on from where you stopped.
   same `args`, without `dry_run`, no new question. It differs, or the write is not in the package → stop and ask.
   A tool with no preview of its own: compare the exact change with the package. One write at a time; read the state
   back after each. Follow the input schema, not the preview's hints: a preview may say "call again with
-  `confirmed: true`" (or ask for a `retryKey`) when the schema does not list it; then leave it out. A quote carries
-  `maxCredits` and `maxPriceUsd`: show the credits, with the dollars in brackets (see "Prices").
+  `confirmed: true`" (or ask for a `retryKey`) when the schema does not list it; then leave it out. A `people.search`
+  quote carries `maxCredits` and `maxPriceUsd`: show the credits, with the dollars in brackets (see "Prices").
+  Other quotes (e.g. `prospects.research`) may carry only cost fields.
 - **Prices.** Paid calls: `people.search`, `prospects.enrich`, `prospects.research`. Always say "up to N credits
   (~$X)". Take N from the quote's `maxCredits` and X from `maxPriceUsd`. Never show `maxUsd` or any provider cost:
-  that is the platform's cost, not the price. When the quote has no credit fields, convert as described in
-  `references/enrich.md` ("Showing a price") and say it is an estimate.
+  that is the platform's cost, not the price. When the quote has only cost fields (`perPersonMaxUsd`, `maxUsd`,
+  `capUsd`), convert `perPersonMaxUsd` for the price per person and `maxUsd` for the total; `capUsd` is the tool's
+  hard cap per person, not the quote (an upper bound only). Credits = cost in USD × 100, rounded up (1 credit per
+  cent of cost); the dollars in brackets = credits × the price per credit (a `people.search` quote's `maxPriceUsd` ÷
+  `maxCredits`, else about $0.015). Example: $0.038 cost → 4 credits (~$0.06). Say it is converted. Details:
+  `references/enrich.md` ("Showing a price").
 - **Paid calls run within the budget.** Always quote first (dry run). The quote fits what is left of the budget,
   the approved scope (same filters, count, list) and the estimate (at most 25% more per unit) → make the real call
   without asking. Otherwise stop and ask; propose less rather than more. After every paid step show the ledger:
@@ -166,13 +174,15 @@ instead of asking again.
    (`knowledge.get`, only if a campaign exists). Report what you found in plain words.
 2. The to-do (A7): only the missing items, each with its link. It does not block the questions.
 3. One message with the 17 questions, each with your proposal. At most one follow-up round.
-4. The dry runs (Step D), all before the package: the suite install (if apps are missing), Booking `create_type` /
+4. The dry runs (Step D), all before the package: the suite install (if apps are missing), board links Dealmaker →
+   Booking and Booking → Dealmaker (`connect` with explicit `things`, if one is missing), Booking `create_type` /
    `set_schedule` previews, the AI CRM change, the `people.search` quote (the price per person).
 5. The approval package (Step E): who and how many, channels, accounts and timeline, campaign name (texts are
-   English), `reviewMode`, the knowledge base, Booking, AI CRM, blocklist, suite, the budget with an estimate, what
-   you will not do, the moments the person is needed later. Wait for one explicit yes.
-6. Right after the yes, the writes (Step C) in this order: suite → blocklist → Booking type and hours → AI CRM. No
-   new question, but each one re-runs its dry run first; anything different from the package: stop and ask.
+   English), `reviewMode`, AI dialogue, the knowledge base, Booking, AI CRM, blocklist, suite, board links, the
+   budget with an estimate, what you will not do, the moments the person is needed later. Wait for one explicit yes.
+6. Right after the yes, the writes (Step C) in this order: suite → board links → blocklist → Booking type and hours
+   → AI CRM. No new question, but each one re-runs its dry run first; anything different from the package: stop and
+   ask.
 7. Progress report, then go straight on to Prospect.
 
 **Person only:** connect LinkedIn and the mailbox (sender name, postal address, DNS) in Dealmaker
@@ -233,10 +243,12 @@ first lines; Dealmaker reads recent LinkedIn posts by itself after Admit. **Done
 2. Templates: `templates.list`, then `templates.save` for this campaign's templates (four for email + LinkedIn, two
    for LinkedIn only) from the package's product, offer and never-say lines. No links and no placeholders in them.
    Dry run, then the real call.
-3. `campaigns.create_draft` with the package's plan (name, channels, accounts, steps, `reviewMode`; `language: "en"` always: the AI writes English only, the field is kept for compatibility). Dry
+3. `campaigns.create_draft` with the package's plan (name, channels, accounts, steps, `reviewMode`; `language: "en"`
+   whenever the schema lists `language`: the AI writes English only). Dry
    run, compare, real call. Show `readiness`.
 4. Right after it: `knowledge.get`, then `knowledge.save` with the package's knowledge base (dry run first). A field
-   over its limit: shorten it and say what you cut. No links. Tool missing: tell the person what to paste where.
+   over its limit: shorten it and say what you cut. No links, and no link fields even if the schema lists them.
+   Tool missing: tell the person what to paste where.
 5. `campaigns.get` and `knowledge.get`: an empty company profile or a `readiness` item goes into the hand-off.
 6. **The launch hand-off:** one message, three links, in this order: Settings tab (switch on AI dialogue, and
    nudges if chosen), Leads tab (Admit), Launch (campaign header). Then what happens next on its own, and that you
