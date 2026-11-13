@@ -45,7 +45,7 @@ To update a skill, copy its folder again.
 
 | Skill | What it does | Apps it uses |
 |---|---|---|
-| [`sales-partner-outreach`](skills/sales-partner-outreach/SKILL.md) | Finds sales or reseller partners for your product, looks up their emails and saves a **draft** campaign whose messages Dealmaker's AI writer prepares for each person. Reviews the prepared texts, helps with reply drafts and reports status on request. You admit, approve and launch. | Dealmaker (required); CRM and Booking (optional) |
+| [`sales-partner-outreach`](skills/sales-partner-outreach/SKILL.md) | Finds sales or reseller partners for your product and brings them to a call. Asks setup questions, takes one approval package with a credit budget, then runs people search, email lookup, research, a draft campaign, reply drafts with booking links and booking status. You admit, launch, switch AI dialogue and approve replies. | Dealmaker, Booking, AI CRM |
 
 More skills are on the way.
 
