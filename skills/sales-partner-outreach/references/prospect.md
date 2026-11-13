@@ -28,9 +28,12 @@ request is the yes for that one value.
 | Size | `companySizes` | Bands only: 1-10, 11-50, 51-200, 201-500, 501-1000, 1001-5000, 5001-10000, 10001+. Round to whole bands and say so. |
 | Must-have words | `keywords` | One string; it may match the job title only. |
 
-At least one filter. `count` 1-25 (default 25). `page` 1-100, but further pages may be refused on some platforms:
-for more people run another search with different filters (another state, title or size) into the same list. Only
-the searches the package listed run without asking; a new one is a scope change. `listName` (found, or created) or
+At least one filter. `count` 1-25 (default 25). `page` 1-100. For more people, prefer the next page of the same
+filters (`nextPage`); a page past the end answers `found: 0, more: false` and is free. Further pages may be refused
+on some platforms: then run another search with different filters (another state, title or size) into the same
+list. A changed or wider search (page 1) can return people an earlier search already found, and each person
+returned is charged again: before such a search, tell the person that repeats are possible and are paid. Only the
+searches the package listed run without asking; a new one is a scope change. `listName` (found, or created) or
 `listId` (an existing list), never both.
 
 ## 3. Dry run: the quote
@@ -43,7 +46,8 @@ the searches the package listed run without asking; a new one is a scope change.
   <maxPeople> people".
 - No credit fields (an older Dealmaker): convert from `perPersonMaxUsd` as in `enrich.md` ("Showing a price"), say
   it is an estimate. Never show `maxUsd`.
-- Only people returned are billed; an empty answer is free; the same search within 7 days comes from a cache.
+- Only people returned are billed, repeats from an earlier search too; an empty answer is free; the same search
+  within 7 days comes from a cache.
 - `not_configured`: Dealmaker has no connection to the platform's search; say so and stop.
 
 **Go or stop** (`enrich.md`, "The budget and the ledger"): `search` matches the package's filters and count, the
@@ -73,6 +77,10 @@ go on:
 "Found 23 (2 dropped: no LinkedIn link). Saved to the list '<name>' → <list.link>. Spent so far: up to 644 of 1,700
 credits (~$9.66); left: 1,056." Then a table: name, title, company, country.
 
+After a follow-up search, say how many are new (`imported.created`) and how many were already known
+(`imported.updated`): "Found 5: 2 new, 3 already in the list from the earlier search. All 5 are charged." The ledger
+counts every person returned.
+
 - **Skip list.** A person from a company on the package's skip list that the blocklist did not catch: remove them
   from the list (below) and say so. That is inside the package.
 - **Removing people.** Say once: "If you want anyone out, tell me their names any time before you admit them; I'll
@@ -85,6 +93,12 @@ To remove people:
 - `app_write(warmleads, lists.remove, { listId, prospectId })`, one per person, after the person names them (their
   request is the yes). `changed: false`: they were not in the list. The person stays in Dealmaker; only the list
   membership goes. Once a draft campaign uses the list, removing someone stops them in it; that is fine before Admit.
+
+To add a person already in Dealmaker to a list (e.g. one removed by mistake): `lists.add` (`listId`, `prospectId`).
+It can refuse with `INVALID_ARGUMENTS` even with valid ids. Then use `prospects.import` with that `listId`, one row
+per person (`firstName`, `lastName`, `linkedinUrl` from their record) and `duplicatePolicy: "update"`: Dealmaker
+matches the existing person and answers `created: 0` with `updated` and `added` per person; no duplicate. Dry run
+first, as for any write.
 
 ## 6. People the person brings from elsewhere
 
@@ -105,4 +119,5 @@ when the package chose LinkedIn only).
 | `people.search` | Paid | the same | `found`, `list`, `imported`, `issues` |
 | `prospects.search` | Read | `filters.listId`, `cursor` | `items[]._id`, `done` |
 | `lists.remove` | Write | `listId`, `prospectId` | `changed` |
+| `lists.add` | Write | `listId`, `prospectId` | refused: `prospects.import` with `duplicatePolicy: "update"` |
 | `lists.list` | Read | `limit` | lists, to check after `outcome_unknown` |

@@ -26,6 +26,7 @@ their own preview: `dry_run: true` on `app_write` comes back as Booking's previe
   link back, e.g. the host blocked the call: the click path to Booking's calendar settings, as in `setup.md` A4;
   never retry around the denial). Check again before the first partner books.
 - **Deal move:** AI CRM `list_pipelines` / `save_pipeline` `meetingStages` (Setup C4).
+- **Board links:** Dealmaker → Booking and Booking → Dealmaker, read in `list_apps` (Setup A1, C1b).
 
 ## 2. The personal link per partner
 
@@ -36,8 +37,9 @@ the board can tell which partner booked even if they type another email.
 **When Dealmaker adds the link itself.** Some Dealmaker versions ask Booking for the link and add it as the last
 line of an untouched AI draft, or show "Personal booking link from Booking" with **Insert** next to the Inbox
 composer when the draft was edited first. This needs the campaign's booking meeting type (the person sets it on the
-campaign's Settings tab) and a board link from Booking to Dealmaker. If the draft already ends with such a link, keep
-that line when you edit. If you edit before it arrives, tell the person to use **Insert**.
+campaign's Settings tab) and the board link Dealmaker → Booking (`request.Request`) that carries the request for the
+personal link; the booked signal comes back on the link Booking → Dealmaker (`core.Person`, `core.Event`). If the
+draft already ends with such a link, keep that line when you edit. If you edit before it arrives, tell the person to use **Insert**.
 
 **Otherwise (the fallback): make the link by hand.** For each interested partner whose draft has no Booking link:
 1. `create_link` with `dry_run: true`: `type` (the meeting type's slug), `name`, `email` (their `valid` one, else
@@ -97,8 +99,9 @@ no)"
   in a campaign; `app_tool_describe` it, dry run, then the real call. No such tool: say so and give the person the
   conversation link (`<origin>/inbox/<threadId>`) or the campaign's Leads tab to do it there. Never pause the whole
   campaign for one partner, and never use `lists.remove` for this unless the person asks for exactly that.
-- Never mark a partner booked yourself and never change the board's links for this unless the person asks; then use
-  the board tools with a dry run first and their yes.
+- Never mark a partner booked yourself and never change the board's links for this unless the person asks or the
+  approved package lists the link; then use the board tools with a dry run first (and the person's yes, when the
+  package does not list it).
 
 ## 6. Reschedule and cancel
 

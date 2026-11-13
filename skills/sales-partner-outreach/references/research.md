@@ -34,8 +34,10 @@ again.
 
 The answer: `status: "ready"`, `people` (to research), `cached`, `skipped` (suppressed), `linkedin` (`toRead`,
 `skipped` with reasons such as `not_in_campaign`: expected before a campaign), and `quote`. Show the price as in
-`enrich.md` ("Showing a price"); the quote may carry only cost fields (`perPersonMaxUsd`, `maxUsd`), which you
-convert and never show. Typical: up to about 5 credits a person; an empty search is free.
+`enrich.md` ("Showing a price"); the quote may carry only cost fields (`perPersonMaxUsd`, `maxUsd`, `capUsd`), which
+are the platform's cost: never show them. Convert `perPersonMaxUsd` (per person) and `maxUsd` (total); `capUsd`
+is the tool's hard cap per person, not the quote (an upper bound only). Credits = cost × 100, rounded up ($0.038 →
+4 credits, ~$0.06), and say the price is converted. Typical: up to about 5 credits a person; an empty search is free.
 
 **Go or stop** (`enrich.md`, "The budget and the ledger"): the people are the run's list, the quote fits what is
 left of the budget, and the price per person is at most 25% above the package's estimate: go on without asking.

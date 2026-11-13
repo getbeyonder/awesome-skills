@@ -9,9 +9,14 @@ not needed for a lookup.
 Use this for every paid quote in the flow.
 - **The quote has `maxCredits`:** "up to <maxCredits> credits (~$<maxPriceUsd>)". Per item, if given:
   `perLookupMaxCredits` / `perPersonMaxCredits`.
-- **No credit fields, but a cost field** (`maxUsd`, `perPersonMaxUsd`): that is the platform's cost, never shown.
-  Convert: credits per item = cost per item × 100, rounded up; total = that × the number of items; price ≈ credits ×
-  $0.015. Say "about" and that the app gave no credit price.
+- **No credit fields, but a cost field** (`maxUsd`, `perPersonMaxUsd`, `capUsd`; `prospects.research` often answers
+  only these): that is the platform's cost, never shown. Convert `perPersonMaxUsd` for the price per person and
+  `maxUsd` for the total; `capUsd` is the tool's hard cap per person, not the quote (use it only as an upper
+  bound). Credits = cost in USD × 100, rounded up (1 credit per cent of cost); no `maxUsd`: total = credits per
+  item × the number of items; dollars in brackets = credits × the price per credit, which is a `people.search`
+  quote's `maxPriceUsd` ÷ `maxCredits` (else about $0.015). Example:
+  $0.038 cost → 4 credits (~$0.06). Never divide a cost by the price per credit. Say "about" and that the price is
+  converted (the app gave no credit price).
 - **No price at all** (an older email lookup answers a `quote` with `total: 0`, `available: 0`): that 0 is not the
   price; never show it. Say the app gives no price for this, and use the typical ceiling of about 29 credits
   (~$0.43) per email found as an estimate, clearly marked as one.

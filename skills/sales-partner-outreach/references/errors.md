@@ -45,6 +45,8 @@ again without asking.
 | `SENDER_OWNERSHIP_MISMATCH` | `create_draft`, `campaigns.update` | Use only accounts with the person's `ownerMemberId` |
 | `readiness` not empty | After `create_draft` | Tell the person what to fix, with the link |
 | `needs_edit` + `BUSINESS_PROFILE_MISSING` | Messages list | The person fills the company profile |
+| `needs_edit` + `invalidReason: provider_error` | Messages list (often every first AI message, right after Launch) | Dealmaker's AI writer could not reach its model: an app problem, not the person's data. Tell the person; they report it to whoever runs their Dealmaker or Beyonder. Never write the text yourself; read again on the next status (`outreach.md`, section 8) |
+| `INVALID_ARGUMENTS` | `lists.add` with valid ids | Add the person with `prospects.import` instead (`prospect.md`, section 5) |
 | `CAMPAIGN_NOT_READY` | Launch (the person's) | Fix `readiness` first |
 
 ## After `outcome_unknown`: read first
@@ -53,7 +55,7 @@ again without asking.
 |---|---|---|
 | `suite_install`, `app_install` | `suite_get`, `list_apps` | the apps are not there or not installing |
 | `people.search` with a list | `lists.list`, then `prospects.search` for that list | the list has no people from this search |
-| `prospects.import`, `lists.remove` | `prospects.search` for the list | the change is not there |
+| `prospects.import`, `lists.add`, `lists.remove` | `prospects.search` for the list | the change is not there |
 | `prospects.enrich` | after a few minutes `prospects.get` (`prospects.enrichStatus` only if `apps_tools_list` lists it) | no job and no email |
 | `prospects.research` | after a few minutes `prospects.get` for a few people | nobody has new `research` |
 | `blocklist.add` | `blocklist.list` with that value's `kind` | the value is not blocked |
