@@ -45,7 +45,8 @@ again without asking.
 | `SENDER_OWNERSHIP_MISMATCH` | `create_draft`, `campaigns.update` | Use only accounts with the person's `ownerMemberId` |
 | `readiness` not empty | After `create_draft` | Tell the person what to fix, with the link |
 | `needs_edit` + `BUSINESS_PROFILE_MISSING` | Messages list | The person fills the company profile |
-| `needs_edit` + `invalidReason: provider_error` | Messages list (often every first AI message, right after Launch) | Dealmaker's AI writer could not reach its model: an app problem, not the person's data. Tell the person; they report it to whoever runs their Dealmaker or Beyonder. Never write the text yourself; read again on the next status (`outreach.md`, section 8) |
+| `needs_edit` + `invalidReason: REQUIRES_EDIT:<codes>` | Messages list (e.g. `REQUIRES_EDIT:length`: a LinkedIn message over 600 characters) | The AI's text broke a rule (`length`, `placeholder`, `name_start`, `subject`, copy or phrase checks). Fix the step's template (`length`: ask for "no more than 450 characters, 3 sentences"); then the person presses "Regenerate" in the Queue. No tool regenerates (`outreach.md`, section 8) |
+| `needs_edit` + `invalidReason: provider_error` | Messages list (often every first AI message, right after Launch) | Dealmaker's AI writer could not reach its model: an app problem, not the person's data. An older Dealmaker also shows it for a text over its limit: if the template does not ask for a short text, handle it as `REQUIRES_EDIT:length` first. Otherwise tell the person; they report it to whoever runs their Dealmaker or Beyonder. Never write the text yourself; read again on the next status (`outreach.md`, section 8) |
 | `INVALID_ARGUMENTS` | `lists.add` with valid ids | Add the person with `prospects.import` instead (`prospect.md`, section 5) |
 | `CAMPAIGN_NOT_READY` | Launch (the person's) | Fix `readiness` first |
 

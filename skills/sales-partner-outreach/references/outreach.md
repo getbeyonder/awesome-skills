@@ -73,10 +73,13 @@ The campaign's knowledge base is used only for replies, not for first messages.
    - `<name>: LinkedIn opener` (`kind: "icebreaker"`)
    - `<name>: LinkedIn follow-up` (`kind: "follow_up"`)
 3. Instructions (up to 2000 characters; `example` up to 1200): who we write to, what the product is (Q1), what the
-   partner gets and what we ask for (Q2), "open on one concrete detail about them", a length (e.g. under 120 words
-   for an email), the never-say lines (Q4). For follow-ups: "a short, new reason to talk; do not repeat the first
-   message". Only allowed variables (`{{first_name}}`, `{{company}}`, ...); any other `{{...}}` is refused. **No
-   links**: a link in a first touch is refused, and the video and booking links belong to replies.
+   partner gets and what we ask for (Q2), "open on one concrete detail about them", a length with margin below
+   Dealmaker's limits (an AI email up to 1200 characters, an AI LinkedIn message up to 600, an invitation note up to
+   180, or 280 with Sales Navigator; a longer text is not used): "under 120 words" for an email, "no more than 450
+   characters, 3 sentences" for a LinkedIn opener or follow-up, the never-say lines (Q4). For follow-ups: "a short,
+   new reason to talk; do not repeat the first message". Only allowed variables (`{{first_name}}`, `{{company}}`,
+   ...); any other `{{...}}` is refused. **No links**: a link in a first touch is refused, and the video and booking
+   links belong to replies.
 4. **No placeholders.** A term still in brackets (`[commission]`, `[payout terms]`, `[deal size]`,
    `[contract length]`) never goes into a template: leave that line out and say so. When the person gives the real
    terms before Admit, update the templates (dry run first; it is what the package said).
@@ -100,7 +103,8 @@ even as optional: the AI writes English only; leave it out only when the schema 
 Step fields: `type` (`email`, `invite`, `wait_accept`, `message`, `visit`), `delayDays` (0-60 after the previous
 step), `mode: "ai"` with a `templateId` whose `kind` fits (email → email; message → icebreaker or follow_up; invite
 note → invite_note), no `text`. An email step needs a `subject` (up to 60) even in AI mode; the AI writes each
-person's own subject. `invite` without `text` goes without a note (a note is up to 180 characters, no pitch).
+person's own subject. `invite` without `text` goes without a note (a note is up to 180 characters, or 280 with
+Sales Navigator, no pitch).
 `wait_accept` with `notAcceptedDays` (1-30, default 14): not accepted in time finishes the person.
 
 **Email + LinkedIn:**
@@ -216,26 +220,37 @@ For each text, read the person (`prospects.get`: `research`, `linkedinActivity`)
 - every fact is in their research, posts or profile; nothing invented;
 - the offer and the ask match the package; nothing from the never-say lines;
 - the LinkedIn opener does not repeat the email's opening; each follow-up adds something new;
-- limits: an AI email up to 1200 characters, an AI LinkedIn message up to 600, an invitation note up to 180, a
-  subject up to 60; no placeholders or brackets; no link in a first touch; does not start with "I" or the person's
-  name; English.
+- limits: an AI email up to 1200 characters, an AI LinkedIn message up to 600, an invitation note up to 180 (280
+  with Sales Navigator), a subject up to 60; no placeholders or brackets; no link in a first touch; does not start
+  with "I" or the person's name; English.
 
 **Edits inside the package go ahead without asking:** removing an invented fact, a never-say line or a link, fixing
 the offer to the package's words, length, placeholders, a follow-up that repeats the first message. Use
 `campaigns.messages.edit` per text (`messageId`, `expectedRevision`, `text`, `subject` for an email). A final text:
-no `{{variables}}`. A LinkedIn message you edit may be up to 1900 characters. Report each edit as before/after in
-the status message. A change of tone, angle or offer that the package did not cover: propose it and wait for a yes.
+no `{{variables}}`. Keep a text you edit within the limits above (a LinkedIn message up to 600 characters, not
+LinkedIn's own 1900). Report each edit as before/after in the status message. A change of tone, angle or offer
+that the package did not cover: propose it and wait for a yes.
 
 An edit **never approves**. A text the person already approved is theirs (refused). A text already sent cannot be
 changed. `needs_edit` with `BUSINESS_PROFILE_MISSING` on every text: the company profile is empty; give the person
 `<origin>/settings/workspace`.
 
+`needs_edit` with `invalidReason: REQUIRES_EDIT:<codes>` (e.g. `REQUIRES_EDIT:length`): the AI writer wrote the
+text, but it broke a rule and is not used. Codes: `length` (over the limits above), `placeholder`, `name_start`
+(starts with "I" or the person's name), `subject`, and copy or phrase checks. Fix the cause in that step's template
+(`length`: ask for a shorter text, e.g. "no more than 450 characters, 3 sentences" for a LinkedIn message): before
+Launch, `templates.save` yourself (dry run first); once the campaign is active, the template is the person's, so give
+them the new instruction to paste. Then the person presses "Regenerate" on that text in the Queue
+(<links.queue>); no tool makes the AI write again. Tell the person which texts and why.
+
 `needs_edit` with `invalidReason: provider_error` (often every first AI message at once, right after Launch, with an
 empty text; the invite step `ready`, follow-ups `preparing`): Dealmaker's AI writer could not reach its model. It is
-an app or platform problem, not the person's data. Tell the person plainly: invitations still go out, but anyone who
-accepts gets no first message until the text is written; ask them to report it to whoever runs their Dealmaker or
-Beyonder. Do not write the text yourself with `campaigns.messages.edit` (Dealmaker's AI writer writes these texts),
-and no tool makes it write again. Read `campaigns.messages.list` again on the next status.
+an app or platform problem, not the person's data. An older Dealmaker also shows `provider_error` for a text that
+broke a rule (most often a LinkedIn message over 600 characters): if the template does not ask for a short text,
+handle it as `REQUIRES_EDIT:length` above first. Otherwise tell the person plainly: invitations still go out, but
+anyone who accepts gets no first message until the text is written; ask them to report it to whoever runs their
+Dealmaker or Beyonder. Do not write the text yourself with `campaigns.messages.edit` (Dealmaker's AI writer writes
+these texts), and no tool makes it write again. Read `campaigns.messages.list` again on the next status.
 
 With manual review, end with the Queue link: "<n> messages wait for your approval: <links.queue> → each person's
 'Review messages' → 'Approve' or 'Approve selected'."
