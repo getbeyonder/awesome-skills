@@ -242,7 +242,8 @@ first lines; Dealmaker reads recent LinkedIn posts by itself after Admit. **Done
    account in the package that is not connected now: stop and ask the person to connect it.
 2. Templates: `templates.list`, then `templates.save` for this campaign's templates (four for email + LinkedIn, two
    for LinkedIn only) from the package's product, offer and never-say lines. No links and no placeholders in them.
-   Dry run, then the real call.
+   Each asks for a length well below Dealmaker's limits (a LinkedIn message: "no more than 450 characters, 3
+   sentences"; the limit is 600, and a longer text is not used). Dry run, then the real call.
 3. `campaigns.create_draft` with the package's plan (name, channels, accounts, steps, `reviewMode`; `language: "en"`
    whenever the schema lists `language`: the AI writes English only). Dry
    run, compare, real call. Show `readiness`.
@@ -255,7 +256,7 @@ first lines; Dealmaker reads recent LinkedIn posts by itself after Admit. **Done
    need the person again only for replies. Exact text: `references/outreach.md`, section 7.
 7. When the person later asks for status: check the texts that are not sent yet against `prospects.get`; edits that
    only bring a text in line with the package go ahead with `campaigns.messages.edit` (report them). An edit never
-   approves.
+   approves. A `needs_edit` text (`REQUIRES_EDIT:<codes>`, `provider_error`): `references/outreach.md`, section 8.
 
 **Done when:** the hand-off is sent; `campaigns.get` shows the campaign active after the person's Launch.
 
