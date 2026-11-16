@@ -13,6 +13,11 @@ in the blocklist), the budget and the estimate per person. Nothing is asked here
 Use the filters, counts and list name exactly as the package showed them (e.g. `US partners: IT agencies 11-200`).
 Dealmaker does not store the filters, so the list name is their only trace. No recap, no "OK?".
 
+**The suite's starter list** (only when this chat installed the suite and the package reuses it): read it as in
+`setup.md`, "The suite's starter items". Still empty: the search goes into it with `listId` (its name stays; the
+campaign name will carry the trace). Not empty, or not there yet: the package's own list with `listName`, and say
+why in the report. Both are in the package: no question.
+
 A company the person names only now (not in the package): block it with `blocklist.add` (as Setup C2); their
 request is the yes for that one value.
 
@@ -51,8 +56,9 @@ searches the package listed run without asking; a new one is a scope change. `li
 - `not_configured`: Dealmaker has no connection to the platform's search; say so and stop.
 
 **Go or stop** (`enrich.md`, "The budget and the ledger"): `search` matches the package's filters and count, the
-list name or id in your `args` is the package's, the quote fits what is left of the budget, and the price per person
-is at most 25% above the package's: go on without asking. Anything else: stop and ask.
+list name or id in your `args` is the package's (the starter list's id counts when the package reuses it), the quote
+fits what is left of the budget, and the price per person is at most 25% above the package's: go on without asking.
+Anything else: stop and ask.
 
 ## 4. The real search
 
