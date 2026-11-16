@@ -48,13 +48,23 @@ its name, and say which company (its slug) you read and later wrote.
   "ready" flag: read each app's fields. An app with `state: "ready-made"` and `deployment: "bound"` is installed
   and usable; if those exact fields are missing, a bound deployment means usable. Anything else (installing,
   waiting for the owner, archived) is not ready yet.
-- Dealmaker, AI CRM and Booking all present and ready: say so.
+- Dealmaker, AI CRM and Booking all present (ready, or still getting ready): say so. **Do not offer the suite**, even
+  if the catalog lists one or the person names it. A suite install adds its starter items next to what the apps
+  already hold, so the person would get a second draft campaign, list, set of message templates, meeting type and
+  pipeline. Say it in one line: "All three apps are on your board, so I won't install the suite '<title>': it would
+  add its starter draft, list and templates next to yours, as duplicates. I set up only what this run needs." An app
+  that is only archived is missing: see below.
 - Some missing: look in `catalog_list` for a suite whose apps are Dealmaker, AI CRM and Booking (for example one
   called "Sales partner search"). If there is one, `suite_get` shows which of its apps are present, getting ready,
-  waiting for the owner, or archived before. Never promise a suite the catalog does not list.
+  waiting for the owner, or archived before. Never promise a suite the catalog does not list. Read what the suite
+  adds from its description in `catalog_list` (for a template suite: starter settings in each app), never from
+  memory.
 - Say in one line: "Your board is missing <apps>. The suite '<title>' installs Dealmaker, AI CRM and Booking
   together, with a meeting type for partner calls and a partner pipeline. Free, no credits. I'll put it into the
   package with its exact dry-run result." The install itself waits for the package's yes (Step D1, Step C).
+  A template suite also adds starter items in Dealmaker (a draft campaign, an empty list, message templates, a target
+  profile). This run reuses them instead of making its own copies; see "The suite's starter items" below. If Dealmaker
+  is already on the board, they land next to the person's own items: say so in the same line.
 - Apps archived before: the suite's dry run asks whether to restore their data or start fresh. Put that choice as a
   question into Step B (your proposal: restore); you do not choose.
 - The person does not want the suite: nothing is installed. Say what it means ("Without Booking there is no booking
@@ -62,6 +72,9 @@ its name, and say which company (its slug) you read and later wrote.
   into the package instead). Without Dealmaker the flow cannot run: say so and stop.
 - **Dealmaker is missing:** A2, A3 and A6 cannot be read yet. Ask the questions anyway; the package marks what is
   "checked right after the install".
+- **Dealmaker is present and the suite goes into the package:** read Dealmaker `templates.list`, `lists.list` and
+  `campaigns.list` now and keep the names you saw. After the install, only an item that was not in this read counts
+  as the suite's starter item (an item of the same name that was already there is the person's).
 - **Board links.** Read the links in the same `list_apps` answer. Two matter: Dealmaker → Booking with type
   `request.Request` (lets Dealmaker ask Booking for a lead's personal booking link) and Booking → Dealmaker with
   types `core.Person`, `core.Event` (lets Dealmaker learn who booked). A link that is only "proposed" is not on
@@ -246,7 +259,9 @@ F. Money
 | 17 Budget | A hard ceiling a little above the plan for Q7 (about 10% headroom): search ~28, emails ~29, research ~5 credits a person (leave out emails for LinkedIn only) | A number. Dollars become credits at about $0.015 a credit, shown back. Below the plan: say what fits and propose a smaller count or LinkedIn only. "No limit" fails: the package needs a ceiling. | The proposal | The package's budget; the ledger; never sent to a tool |
 
 Defaults you do not ask about (the package shows them): look up emails for everyone found without one; research
-the whole list; news from the last 12 months; no test run to a colleague. The person may ask for one: if
+the whole list; news from the last 12 months; a soft LinkedIn opener with no A/B test (the person may ask for an
+A/B test of a short call question in the first message: `outreach.md`, section 4); no test run to a colleague. The
+person may ask for one: if
 `lists.list` shows an existing internal one-person list (a test receiver), ask in Setup whether to reuse it; else
 the package lists a new one-person test list. Either way the test gets its own small draft. A test draft from an
 earlier run (`campaigns.list`) is kept as it is and a fresh one is made, unless the person says to reuse it. With
@@ -264,9 +279,11 @@ here is a read or a dry run: nothing changes and nothing is paid. Run only what 
 
 ### D1. Suite install (only if apps are missing) and board links
 
-`suite_install` with `dry_run: true`. Note what it would install, which links between the apps it would switch on,
-and, for apps archived before, the person's restore-or-fresh answer from Step B. `needs_owner` or `payment_required`:
-the install is the owner's step; give the link, leave the suite out of the package and say what cannot run.
+Never with all three apps present (A1). `suite_install` with `dry_run: true`. Note what it would install, which
+links between the apps it would switch on, and, for apps archived before, the person's restore-or-fresh answer from
+Step B. `needs_owner` or `payment_required`: the install is the owner's step; give the link, leave the suite out of
+the package and say what cannot run. For the package's "Suite starter items" lines, take what the suite adds from
+its description (A1), and plan the reuse as in "The suite's starter items" below.
 
 Each board link A1 found missing (and the suite does not switch on): `connect` with `dry_run: true` and an explicit
 `things` list: `["request.Request"]` for Dealmaker → Booking, `["core.Person", "core.Event"]` for Booking →
@@ -344,9 +361,23 @@ One message, in plain words, no internal ids or field names. Mark lines that use
 Approval package: one "yes" lets me run all of this on my own
 
 WHAT I SET UP NOW
-Board          Dealmaker, AI CRM, Booking: on the board
+Board          Dealmaker, AI CRM, Booking: on the board (no suite: it would add duplicates of your items)
                | install the suite "<title>": <apps>, and switch on <links between them>. Free.
                  (dry run: <what it would install; restore or start fresh>)
+<Only with the suite:>
+Suite starter  the suite also adds, in Dealmaker: a draft campaign, an empty list, <n> message templates and a
+items          target profile<, next to your own items>; <what it adds in Booking and AI CRM, from its
+               description>. In Dealmaker I reuse them instead of making copies:
+               - list: the search goes into its starter list while that list is still empty (else a new list "<list
+                 name>")
+               - templates: I change the texts of its LinkedIn opener and follow-up to the ones in this package
+                 (if one is used by a running campaign, I leave it and make my own)
+               - draft: if I can read its steps and they are exactly the steps below, I rename it "<name>" and
+                 set its list, your account and the review mode; otherwise I make my own draft, and you can
+                 delete the starter one in Dealmaker (I never delete anything)
+               - target profile: untouched; it is for Dealmaker's own lead search, which this run does not use
+                 (this run searches the US only, whatever places it lists)
+               Anything of theirs I don't use stays as it is; I tell you which.
 Board links    Dealmaker → Booking (personal booking links) and Booking → Dealmaker (who booked): already on
                | switch on <Dealmaker → Booking | Booking → Dealmaker> (dry run OK). Free.
 Skip list      block <acme.com, beta.io> in Dealmaker, so no campaign reaches them | none
@@ -367,7 +398,8 @@ AI CRM         pipeline "<name>" (the one you named): when a partner books or re
 WHO I FIND
 People         <seniority> of <partner type> in <US place>, <size bands>, <keywords>
                search 1: <filters>, <25> people [search 2: <filters>, <n> people]
-               into the list "<list name>"
+               into the list "<list name>" | into the suite's starter list "<its name>" while it is empty, else
+               into a new list "<list name>"
 Emails         look up work emails for everyone found without one | none (LinkedIn only)
 News           recent web news on everyone, last 12 months
 
@@ -382,8 +414,13 @@ Steps          <email day 0 → email +3 → LinkedIn invitation +2 → wait up 
                | <LinkedIn invitation day 0 → wait up to 14 days → message +1 → +4 → +7>
 Texts          Dealmaker's AI writes them from <4 | 2> templates I make from your product, offer and never-say
                lines (<first email, email follow-up, LinkedIn opener, LinkedIn follow-up | LinkedIn opener,
-               LinkedIn follow-up>).
-               No links in first messages.
+               LinkedIn follow-up>)<; the LinkedIn opener and follow-up are the suite's starter templates with
+               these texts>.
+               No links in first messages. <If `templates.save` lists `firstTouchCall`: The opener stays soft:
+               no call ask in the first message.>
+<Only if `templates.save` lists `firstTouchCall`:>
+A/B test       none (default) | a second LinkedIn opener that ends with one short call question, next to the
+               soft one; you start the experiment between the two in Dealmaker (Settings → Templates)
 Review mode    auto: each written message goes out when due, without your approval.
                (manual would mean you approve every message on the Queue tab; anything not approved in time is
                not sent, which can leave LinkedIn messages unsent.)
@@ -414,7 +451,8 @@ Estimate       about <1,550> credits (~$<23.25>): search up to <700>, emails up 
 
 WHAT I WILL NOT DO
 I never send a message, admit people, press Launch, approve a message or a reply,
-or switch AI dialogue or nudges on. Those stay yours.
+or switch AI dialogue or nudges on. Those stay yours. I never delete a campaign, list,
+template or target profile.
 
 WHEN I NEED YOU LATER
 1. Launch: one message from me with three links: switch on AI dialogue<, and nudges> → Admit the people → Launch.
@@ -463,6 +501,11 @@ tool with no preview), and you compare it with the package:
 the package. A template suite may add a meeting type and a partner pipeline by itself: use them when they match the
 package; if they differ (another length, other stages), ask.
 
+Then read the starter items in Dealmaker (`templates.list`, `lists.list`, `campaigns.list`) and note which of them are
+there, as in "The suite's starter items" below. The platform adds them a little after the apps are ready: none there
+yet is normal; read again before Prospect. Nothing is changed in this step: the list is used in Prospect, the
+templates and the draft in Outreach. Report: "The suite added <...> in Dealmaker; I use them as the package says."
+
 ### C1b. Board links (only if the package switches one on)
 
 After any suite install: `list_apps` again. A link now on (the suite switched it on): nothing to do; say so.
@@ -498,11 +541,85 @@ pipeline already made stays):
    to "New partner" (e.g. `defaultStageId`; take the exact field name from the tool's schema, never guess it).
 4. `list_pipelines` again and confirm the stages, the starting stage and the deal move.
 
+## The suite's starter items
+
+Only when this chat installed the suite (C1). A template suite's starter set adds, in Dealmaker, a draft campaign
+with an empty list, message templates and a target profile. This run reuses them, so the person ends up with one
+draft, one list and one set of templates. Everything here is covered by the package's "Suite starter items" lines;
+no new question.
+
+**Which items are the suite's.** Recognise them by name and kind, never by an id you remember:
+
+| Item | Name in the "Sales partner search" starter set | Kind |
+|---|---|---|
+| Draft campaign | "Sales partners: first touch (draft)" | a campaign in `state: "draft"` |
+| List | "Sales partners: starter list" | a lead list |
+| LinkedIn opener template | "Partners: personal opener" | `icebreaker` |
+| LinkedIn follow-up template | "Partners: ask for a short call" | `follow_up` |
+| Invitation note template (older sets only) | "Partners: short invite note" | `invite_note` |
+| Target profile | "Partners: agencies, consultants and resellers who serve your buyers" | Dealmaker's own lead search |
+
+An item counts only if it was not there before the install (when Dealmaker was on the board, compare with the read in
+A1; when Dealmaker was installed by the suite, everything in it is new). A suite with other names: use only the items
+whose names you can match this way; anything else is handled as if there were no starter item. Never guess.
+
+**The list (Prospect).** Before the search: `prospects.search` with `filters: { listId }` of the starter list (it has
+no count in `lists.list`); filters apply per page, so follow `cursor` until `done` or the first person found. Nobody
+in it: the search goes into it with `listId` (not `listName`). Anyone in it:
+the package's own new list with `listName`; say why. Dealmaker does not store the filters and the starter list keeps
+its name, so the campaign name carries the trace of what was searched.
+
+**The templates (Outreach, section 4).** `templates.list` gives each template's `id` and current `version`. Change the
+starter opener and follow-up with `templates.save` (`id`, `expectedVersion` = that `version`) to this package's
+templates: the package's `name`, the same `kind`, `instructions`, `example`, `allowedVars` naming every variable the
+texts use (a changed template keeps its own short list otherwise), and for the opener `firstTouchCall: false` if the
+schema lists it. Dry run, compare, real call; then `templates.list` again and check the new `version`. The starter
+draft uses them too; that is fine, it is a draft.
+- Never change a template that an active campaign uses: it belongs to the person. A starter template is new, so
+  normally only the starter draft uses it. You cannot see which campaigns use a template; Dealmaker refuses such a
+  change with `PERSON_ONLY` (`-32003`) and writes nothing. Then leave it as it is, never retry, and make your own new
+  template for that step (no `id`), as the package says.
+- `VERSION_CONFLICT`: read `templates.list` again and repeat once with the new `version`.
+- The email templates (email + LinkedIn) are always new: the starter set has none.
+- The starter invitation note (older sets) is not used: the plan's invitation goes without a note. Leave it.
+
+**The draft (Outreach, section 5).** Reuse the starter draft only if all of these hold:
+- `campaigns.get` shows it is still a `draft`;
+- you can read its steps in a tool answer, and they are exactly the package's steps, in order: the same `type`,
+  `delayDays`, `notAcceptedDays` and `mode`, no invitation note, and every AI step uses the template you prepared for
+  it (its `templateId` is the starter template you changed above). For LinkedIn only, the plan is `invite` day 0
+  with no note → `wait_accept` 14 → `message` +1 opener → `message` +4 follow-up → `message` +7 follow-up. A
+  plan with email steps never matches: the starter draft has none.
+
+Then `campaigns.update` with `id`, `expectedVersion` (the `version` from `campaigns.get`), and only the settings that
+differ: `name` (the package's), `listIds` (the run's list), `linkedinSenderId` and `emailSenderIds` (the person's
+own), `reviewMode` (the package's). Steps cannot be changed with a tool. Dry run, compare, real call, then
+`campaigns.get` again: the name, list, account and review mode are the package's. Its other settings (tone, goal)
+stay as the starter set made them.
+
+Otherwise make your own draft with `campaigns.create_draft` as usual. This includes the case where no tool answer
+shows the draft's steps (some app versions do not return them): you cannot confirm a match, so you do not reuse it.
+Tell the person: "The suite also made a starter draft '<name>' (<link>). I did not use it because <its steps differ
+from the plan: <how> | I can't read its steps | your plan has email steps>. It sends nothing unless someone
+launches it. <It uses the same list as your campaign, so please don't launch it.> You can delete it in Dealmaker
+(Campaigns) if you don't need it; I don't delete anything."
+
+**The target profile.** Never change it: it drives Dealmaker's own lead search, which this run does not use (the
+search is `people.search` with the package's filters). Mention it in the package, and that this run searches the US
+only, whatever places the profile lists.
+
+**What stays unused** (the starter draft or invitation note, a starter list that was not empty): list it once in the
+launch hand-off (`outreach.md`, section 7), each with "you can delete it in Dealmaker if you don't need it".
+
 ## Continuing in a new chat
 
 The package and the budget live only in the chat where they were approved; a new chat has no yes. Read back what
 was applied (`blocklist.list`, one call per `kind`; `list_types`, `get_schedule`, `list_pipelines`, `lists.list`,
-`prospects.search` for the list, the campaign via `campaigns.get`, its knowledge base via `knowledge.get`). Ask, in
+`prospects.search` for the list, the campaign via `campaigns.get`, its knowledge base via `knowledge.get`). A run
+that reused the suite's starter items has the package's campaign name on the renamed starter draft, and may have
+its people in the starter list: find the run's list through the campaign's `listIds`. A new chat cannot tell which
+items the suite added, so it reuses none: its short package makes the run's own templates and draft, and names any
+starter item still unused with "you can delete it in Dealmaker if you don't need it". Ask, in
 one message, only for what the next phases need and cannot read (Prospect needs Q5, Q7; Outreach needs Q1, Q2, Q4 if
 no templates were saved, Q8 to Q11; the knowledge base needs Q1, Q2, Q4 only if it is empty; Engage needs Q3), and
 for the credits left for this run. Then show a short package with only the phases still to run, their dry runs and quotes, and the
