@@ -109,8 +109,9 @@ the report. Then the offer reaches the first messages only through the company p
 `campaigns.create_draft`, dry run with the whole plan (steps, delays, templates), compare with the package, then the
 real call. It never sends and never launches.
 
-**The suite's starter draft** (only when this chat installed the suite): use it instead of a new draft only if its
-steps are exactly the plan's, read from a tool answer (`setup.md`, "The suite's starter items"). Then
+**The suite's starter draft** (only when this chat installed the suite): use it instead of a new draft only if the
+`steps` in its `campaigns.get` answer are exactly the plan's (`setup.md`, "The suite's starter items": type, delay,
+mode, template name and kind, an invitation with no note, no visit). Then
 `campaigns.update` (`id`, `expectedVersion` from `campaigns.get`; `name`, `listIds`, the person's own
 `linkedinSenderId` / `emailSenderIds`, `reviewMode`), dry run, compare, real call, and read `campaigns.get` for
 `readiness` and `links`. Otherwise `campaigns.create_draft` as below, and tell the person the starter draft can be
