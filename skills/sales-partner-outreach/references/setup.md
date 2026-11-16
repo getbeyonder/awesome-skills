@@ -583,13 +583,27 @@ draft uses them too; that is fine, it is a draft.
 - The email templates (email + LinkedIn) are always new: the starter set has none.
 - The starter invitation note (older sets) is not used: the plan's invitation goes without a note. Leave it.
 
-**The draft (Outreach, section 5).** Reuse the starter draft only if all of these hold:
-- `campaigns.get` shows it is still a `draft`;
-- you can read its steps in a tool answer, and they are exactly the package's steps, in order: the same `type`,
-  `delayDays`, `notAcceptedDays` and `mode`, no invitation note, and every AI step uses the template you prepared for
-  it (its `templateId` is the starter template you changed above). For LinkedIn only, the plan is `invite` day 0
-  with no note → `wait_accept` 14 → `message` +1 opener → `message` +4 follow-up → `message` +7 follow-up. A
-  plan with email steps never matches: the starter draft has none.
+**The draft (Outreach, section 5).** After the templates are changed, read the starter draft with `campaigns.get`.
+Its answer lists `steps` in order, each with `type`, `delayDays`, `mode`, `notAcceptedDays`, `hasNote`, `hasText`
+and, for an AI step, `template` (`name`, `kind`); never the texts. Reuse the draft only if all of these hold:
+- `state` is `draft`;
+- the answer has `steps`, and they are exactly the package's steps, one for one and in order: the same `type`,
+  `delayDays` and `mode`; `notAcceptedDays` on the wait; no `visit` step; the invitation with `hasNote: false` and
+  no template; every AI message step with `template.kind` and `template.name` of the template you just saved for it
+  (the opener: `icebreaker` and its new name; each follow-up: `follow_up` and its new name).
+
+For LinkedIn only, the plan is:
+
+| # | `type` | `delayDays` | `mode` | Also |
+|---|---|---|---|---|
+| 1 | `invite` | 0 | `fixed` | `hasNote: false`, no template |
+| 2 | `wait_accept` | 0 | `fixed` | `notAcceptedDays: 14` |
+| 3 | `message` | 1 | `ai` | `template`: the opener (`icebreaker`) |
+| 4 | `message` | 4 | `ai` | `template`: the follow-up (`follow_up`) |
+| 5 | `message` | 7 | `ai` | `template`: the follow-up (`follow_up`) |
+
+A plan with email steps never matches: the starter draft has none. A starter template you could not change (you made
+your own instead) means the draft's step still names the starter template: no match.
 
 Then `campaigns.update` with `id`, `expectedVersion` (the `version` from `campaigns.get`), and only the settings that
 differ: `name` (the package's), `listIds` (the run's list), `linkedinSenderId` and `emailSenderIds` (the person's
@@ -597,8 +611,8 @@ own), `reviewMode` (the package's). Steps cannot be changed with a tool. Dry run
 `campaigns.get` again: the name, list, account and review mode are the package's. Its other settings (tone, goal)
 stay as the starter set made them.
 
-Otherwise make your own draft with `campaigns.create_draft` as usual. This includes the case where no tool answer
-shows the draft's steps (some app versions do not return them): you cannot confirm a match, so you do not reuse it.
+Otherwise make your own draft with `campaigns.create_draft` as usual. This includes an answer with no `steps` (an
+older Dealmaker does not return them): you cannot confirm a match, so you do not reuse it.
 Tell the person: "The suite also made a starter draft '<name>' (<link>). I did not use it because <its steps differ
 from the plan: <how> | I can't read its steps | your plan has email steps>. It sends nothing unless someone
 launches it. <It uses the same list as your campaign, so please don't launch it.> You can delete it in Dealmaker

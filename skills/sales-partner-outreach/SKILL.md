@@ -259,9 +259,10 @@ first lines; Dealmaker reads recent LinkedIn posts by itself after Admit. **Done
    sentences"; the limit is 600, and a longer text is not used). Dry run, then the real call.
 3. `campaigns.create_draft` with the package's plan (name, channels, accounts, steps, `reviewMode`; `language: "en"`
    whenever the schema lists `language`: the AI writes English only). Dry
-   run, compare, real call. Show `readiness`. After a suite install: if a tool answer shows the starter draft's steps
-   and they are exactly the plan's, `campaigns.update` it instead (name, `listIds`, accounts, `reviewMode`); else
-   your own draft, and tell the person the starter one can be deleted in the app.
+   run, compare, real call. Show `readiness`. After a suite install: if `campaigns.get` lists the starter draft's
+   `steps` and they are exactly the plan's, `campaigns.update` it instead (name, `listIds`, accounts, `reviewMode`);
+   else (no match, or no `steps` in an older app) your own draft, and tell the person the starter one can be deleted
+   in the app.
 4. Right after it: `knowledge.get`, then `knowledge.save` with the package's knowledge base (dry run first). A field
    over its limit: shorten it and say what you cut. No links, and no link fields even if the schema lists them.
    Tool missing: tell the person what to paste where.
