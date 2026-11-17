@@ -72,6 +72,13 @@ The campaign's knowledge base is used only for replies, not for first messages.
    - `<name>: email follow-up` (`kind: "email"`)
    - `<name>: LinkedIn opener` (`kind: "icebreaker"`)
    - `<name>: LinkedIn follow-up` (`kind: "follow_up"`)
+
+   **The suite's starter templates** (only when this chat installed the suite): the LinkedIn opener and follow-up are
+   not new ones. Change the starter `icebreaker` and `follow_up` to these texts with `templates.save` (`id` and
+   `expectedVersion` from `templates.list`, the names above), as in `setup.md`, "The suite's starter items". A
+   refusal because an active campaign uses one (`PERSON_ONLY`): leave it and make a new one for that step.
+   `firstTouchCall`, when the schema lists it: `false` on the opener (the soft first touch: one easy question, no call
+   ask). Never set it to `true` on the opener the campaign's steps use.
 3. Instructions (up to 2000 characters; `example` up to 1200): who we write to, what the product is (Q1), what the
    partner gets and what we ask for (Q2), "open on one concrete detail about them", a length with margin below
    Dealmaker's limits (an AI email up to 1200 characters, an AI LinkedIn message up to 600, an invitation note up to
@@ -85,6 +92,13 @@ The campaign's knowledge base is used only for replies, not for first messages.
    terms before Admit, update the templates (dry run first; it is what the package said).
 5. Templates are final before Admit: changing one later makes texts already written wait for the person's choice,
    and a template an active campaign uses can only be changed by the person.
+6. **A/B test of a call ask** (only if the package has it, and only if `templates.save` lists `firstTouchCall`): a
+   separate new template `<name>: LinkedIn opener (call)` (`kind: "icebreaker"`, no `id`) with the opener's
+   instructions and `firstTouchCall: true`: the first message then ends with one short question proposing a brief
+   intro call (still no time, link or calendar). The soft opener stays as it is, and the campaign's steps use it. The
+   experiment between the two is the person's: `<origin>/settings/templates` → Experiments → "Start experiment" on
+   the campaign's opener step; no tool starts it. Put it on the launch hand-off's to-do, after the draft exists. A
+   template in a running experiment is refused for changes.
 
 `templates.save` missing: pick the existing template of the right `kind` that fits a partner pitch and say why in
 the report. Then the offer reaches the first messages only through the company profile (the person edits it in
@@ -94,6 +108,14 @@ the report. Then the offer reaches the first messages only through the company p
 
 `campaigns.create_draft`, dry run with the whole plan (steps, delays, templates), compare with the package, then the
 real call. It never sends and never launches.
+
+**The suite's starter draft** (only when this chat installed the suite): use it instead of a new draft only if the
+`steps` in its `campaigns.get` answer are exactly the plan's (`setup.md`, "The suite's starter items": type, delay,
+mode, template name and kind, an invitation with no note, no visit). Then
+`campaigns.update` (`id`, `expectedVersion` from `campaigns.get`; `name`, `listIds`, the person's own
+`linkedinSenderId` / `emailSenderIds`, `reviewMode`), dry run, compare, real call, and read `campaigns.get` for
+`readiness` and `links`. Otherwise `campaigns.create_draft` as below, and tell the person the starter draft can be
+deleted in the app; never delete it yourself. A test draft (section 2) is always a new draft.
 
 Arguments (check the schema): `name` (1-150), `listIds`, `channels` (`email`, `linkedin`), `linkedinSenderId`,
 `emailSenderIds` (the person's own, from section 1), `language: "en"` (always, whenever the schema lists `language`,
@@ -133,7 +155,8 @@ Answer: `id`, `state: "draft"`, `version`, `readiness` (what still blocks Launch
 
 A wrong step is refused naming `steps[i]` (`-32602`): fix that step and dry-run again (a fix that changes the plan
 the package showed is a stop). To change a draft's settings later: `campaigns.update` with `expectedVersion` from
-`campaigns.get` (draft only; steps are changed in the app); not in the package, so only when the person asks.
+`campaigns.get` (draft only; steps are changed in the app). Apart from reusing the suite's starter draft above, it is
+not in the package, so only when the person asks.
 
 ## 6. Save the knowledge base (right after the draft)
 
@@ -182,7 +205,11 @@ Your campaign "<name>" is ready, and its knowledge base is saved. Three clicks a
 
 <Before Launch, please also: <readiness items / empty company profile / mailbox sender name, postal address, DNS>,
 each with its link. Launch is refused until they are done.> <Tell me the real terms for <[commission], ...>: the
-templates and the knowledge base leave them out until then.>
+templates and the knowledge base leave them out until then.> <A/B test: <origin>/settings/templates → Experiments →
+"Start experiment" on this campaign's opener step, with "<soft opener>" and "<call opener>".> <From the suite, not
+used: <the starter draft "<name>" (<link>) | the invitation-note template "<name>" | the starter list "<name>">.
+Nothing goes out from them unless someone launches the starter draft<; it uses your campaign's list, so please
+don't>. You can delete them in Dealmaker if you don't need them.>
 
 What happens next, on its own: Dealmaker reads each person's recent LinkedIn posts (up to a day), its AI writes the
 first messages from your templates, and <they go out in your accounts' sending windows without your approval |

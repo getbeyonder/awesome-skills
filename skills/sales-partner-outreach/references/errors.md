@@ -38,7 +38,7 @@ again without asking.
 | `ENRICHMENT_ALREADY_PENDING` | Enrich | Do not repeat; read later |
 | `PROSPECT_NOT_FOUND` | Research | Read the ids again; the whole call was refused |
 | `IDEMPOTENCY_ARGUMENT_MISMATCH` | Any keyed write | Never change `args` on a retry |
-| `-32003`, `PERSON_ONLY` | Dealmaker: a person-only step (approved text, running campaign, AI dialogue, nudges, resume, raising a limit) | Hand it to the person with the link |
+| `-32003`, `PERSON_ONLY` | Dealmaker: a person-only step (approved text, running campaign, AI dialogue, nudges, resume, raising a limit) | Hand it to the person with the link. On `templates.save` for a suite's starter template (an active campaign uses it): leave it, make a new one (`setup.md`, "The suite's starter items") |
 | `KNOWLEDGE_REQUIRED` | Switching AI dialogue on (the person's) | The campaign's knowledge base is not saved: save it (`outreach.md`, section 6), then the person tries again |
 | `VERSION_CONFLICT` | `campaigns.update`, `campaigns.messages.edit`, `knowledge.save`, `inbox.drafts.edit`, `templates.save` | Read again, keep what changed, then edit |
 | `DRAFT_STALE` | `inbox.drafts.edit` | The partner wrote again: read the conversation, edit the new draft |
