@@ -39,6 +39,11 @@ existing list. Describe the tool first: filter values and size bands come from i
 and say so. The quote's `search` echoes the filters but not the list, so check the list against your own args. If the
 quote fits, make the real call.
 
+- **Start broad:** titles, seniority, sizes, place and industry, plus at most 1–2 short OR keywords for the partner
+  type ("IT services", "managed services"). Many keywords plus all filters can find no one.
+- **An empty answer is free.** Say why, propose one wider variant and ask (new filters change the scope).
+- **Weak fits** (a sales coach in a search for IT resellers): name them in the report, so the person can skip them at
+  Admit.
 - **Repeats are charged.** A wider or changed search can return people found before, and charges them again. Prefer
   the next page of the same filters. Before another search, warn that repeats are paid, and afterwards report new vs
   already known people.

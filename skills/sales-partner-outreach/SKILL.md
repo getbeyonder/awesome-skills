@@ -58,7 +58,8 @@ booking link, fixing an unsent text) needs no package: their request is the yes.
 
 Every write runs the same way: dry run → compare with the package → the same call without `dry_run` (no new
 question; pass `confirmed` or `retryKey` only if the schema lists them) → read back. A difference, or a write that is
-not in the package, is a stop.
+not in the package, is a stop. The host or MCP may say "wait for a yes" on each dry run: inside an approved
+package, its yes covers a dry run that matches the package; one that differs is a stop.
 
 ## Stop and ask
 
@@ -103,7 +104,8 @@ After each phase, report in a few lines what is done, the ledger and what comes 
 3. **Research** (paid): Dealmaker's web news on each person, **before** the draft campaign exists. Done: results read.
    → `references/paid-steps.md`.
 4. **Outreach** (free): templates, the draft, its knowledge base, then one hand-off with the person's three clicks.
-   Done: hand-off sent; after their Launch the campaign reads active. → `references/outreach.md`.
+   Done: hand-off sent; after their Launch the campaign reads active. Texts are written after Admit and Launch: review
+   them at Status. → `references/outreach.md`.
 5. **Engage** (free): on "any replies?", improve reply drafts and give one list to approve and send. Done: each
    interested partner has a reply the person sent. → `references/engage.md`.
 6. **Book** (free): personal Booking links, and who booked. Done: the meeting is in Booking. → `references/book.md`.

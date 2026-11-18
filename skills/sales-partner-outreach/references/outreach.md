@@ -62,6 +62,8 @@ company profile; the real terms for any open placeholders; the A/B experiment; u
 
 Then what happens on its own: Dealmaker reads recent LinkedIn posts (up to a day), its AI writes the first messages,
 which go out in the sending windows (auto) or wait on the Queue (manual); follow-ups are written a day before due.
+Texts are written only after Admit and Launch (`preparing` until then): nothing to review now. Say so: you check them
+at Status (section 6), while not yet sent.
 
 Close with: "I need you again only for replies. Ask me 'any replies?' whenever you like. Dealmaker has no auto-send
 for replies." Never promise a schedule.
