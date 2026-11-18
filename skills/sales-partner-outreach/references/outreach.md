@@ -1,309 +1,111 @@
-# Phase 4: Outreach
+# Outreach (Phase 4)
 
-Create the draft campaign from the approved package, save its knowledge base, and hand the person their three
-clicks in one message: AI dialogue, Admit, Launch. Then check the texts that are not sent yet whenever the person
-asks for status. Only Dealmaker is used. No call here costs credits.
+Contents: 1. Read first · 2. Templates · 3. The draft · 4. The knowledge base · 5. The hand-off · 6. Check texts not
+yet sent · 7. After Launch · Test run · Older Dealmaker versions
 
-```
-templates with the offer → create_draft → knowledge.save → launch hand-off (one message, three links)
-→ person: AI dialogue (+ nudges) → person: Admit → person: Launch
-→ Dealmaker reads recent LinkedIn posts (≤ 24 h) → AI writes the first touches → they go out in the senders' windows
-   (auto) or wait for the person's approval (manual) → follow-ups are written as they come due
-→ a reply anywhere stops the person
-```
+**Goal:** a draft campaign with its knowledge base saved, then one hand-off message with the person's three clicks.
+Nothing here is paid. Every write follows the same loop: dry run, compare with the package, real call.
 
-Words: **draft** = a saved campaign that sends nothing. **Held** = waiting for the person's admission. **Review
-mode** `auto` (the package's proposal: a written text goes out when due) or `manual` (the person approves each text;
-a text not approved in time is not sent, which can leave LinkedIn messages unsent).
+## 1. Read first
 
-Everything in sections 1 to 6 is covered by the package's yes: each write runs its dry run, and if it matches the
-package the real call follows without a question. A difference is a stop (SKILL.md, "When you stop and ask").
+- `senders.list`: the package's accounts must be connected and the person's own (the same owner as the run's list).
+  If not, stop: the person connects them.
+- The list's people: count the `valid` emails, with numbers ("14 of 21 have a valid email; 7 get LinkedIn only").
+- **First names.** A name that looks like a credential, title or junk ("Nremt-P", all caps, Dr, MBA, an emoji, a
+  company name, one letter) would read "Hi Nremt-P". Show each with a proposed fix and fix only after a yes:
+  re-import with the corrected `firstName`, or edit a prepared text. Never silently.
 
-## 1. Read first (free)
+## 2. Templates
 
-- `senders.list`: the LinkedIn account and mailboxes with `status: "connected"` and no `personStep`. An account the
-  package named that is missing or broken: stop. "Please connect it in Dealmaker: <origin>/settings/senders. Tell me
-  when it is done."
-- `lists.list`: the run's list. Its `ownerMemberId` is the person's member id. Use only accounts with the same
-  `ownerMemberId`: a campaign may use only its owner's accounts.
-- `prospects.search` for the list (follow `cursor`): count people with a `valid` email. Count only `valid`.
+The AI writer writes each AI step from its template (the knowledge base is only for replies). Save new templates
+for this campaign, only those the channels use: first email, email follow-up, LinkedIn opener, LinkedIn follow-up.
+Instructions: who we write to, the product, the partner's gain and our ask, "open on one concrete professional detail
+about them", the never-say lines; follow-ups: "a short, new reason to talk; do not repeat the first message".
+- **Length.** Ask for "no more than 450 characters, 3 sentences" for a LinkedIn message and "under 120 words" for an
+  email. Dealmaker drops an AI LinkedIn message over 600 characters (LinkedIn's own 1,900 does not apply).
+- **Soft opener.** No call ask (`firstTouchCall: false`, if listed); a call ask only as a separate A/B opener the
+  package has, whose experiment the person starts.
+- **No links, no placeholders,** and only the variables the schema allows.
+- **Final before Admit:** once active, a template is the person's. Fixed texts only when the person supplies them.
 
-Say it in one line, with numbers: "14 of 21 people have a valid email: email first, then LinkedIn. The 7 without one
-get LinkedIn only." No "OK?": the package already approved the plan.
+## 3. The draft
 
-## 2. The test run (only if the package has one)
+`campaigns.create_draft` with the package's name, list, channels, the person's own accounts, review mode and steps
+(it never sends):
+- **Email + LinkedIn:** email on day 0 → email +3 → LinkedIn invitation +2 → wait up to 14 days for acceptance →
+  message +1 (opener) → +4 → +7 (follow-ups). An email step needs a subject; the AI writes each person's own.
+- **LinkedIn only:** invitation on day 0 → wait 14 days → message +1 → +4 → +7.
 
-The one-person list the package named: an existing internal test list from `lists.list` when the package reuses
-one, else a new list with the one colleague (`prospects.import`). Then a separate small draft with the same
-templates and steps, made before the main draft. With LinkedIn steps, `excludeFirstDegree: true` (the default)
-leaves out a colleague already connected to the sender, and the test sends nothing on LinkedIn. If the package says
-to include connections: for a 1st-degree test person, a test draft with no invite step (message first) and
-`excludeFirstDegree: false`, on the test draft only. If the dry run refuses it, or the package does not include
-connections, say plainly that the LinkedIn part is not tested. There is no "email only" fallback when no mailbox is connected. A test draft from an earlier run stays as
-it is: make a fresh one, unless the person said to reuse it. After making the test draft, read `prospects.search`
-for the test list with the state for "excluded as 1st-degree connection" (take the exact value from the tool's
-schema; never guess it; no such state: say you cannot check it) and tell the person whether the test person was
-left out. The test gets a launch hand-off of its own first; the main hand-off comes when the person says the test
-looked right.
+The invitation goes **without a note**. A LinkedIn message reaches only people who accepted (or are already
+connected), so LinkedIn starts with the invitation; people already connected are left out by default. A reply on any
+channel stops that person everywhere. Keep `readiness` and `links` for the hand-off. A refusal naming `steps[i]`: fix
+that step and dry-run again (a fix that changes the plan is a stop). `SENDER_OWNERSHIP_MISMATCH`: use only the
+person's own accounts.
 
-## 3. People without a usable email
+## 4. The knowledge base (right after the draft)
 
-Read `app_tool_describe(warmleads, campaigns.create_draft)`:
-- **It says an email step is skipped for a person without a usable address:** one campaign for everyone. Such a
-  person skips the email steps and goes on to the LinkedIn steps (a person with only email steps left stops).
-- **It does not say so** (an older Dealmaker): an email step for such a person never goes out and blocks their later
-  steps. Split the list before the draft: `prospects.import` of the people without a `valid` email into a new list
-  `<name> (LinkedIn only)` (rows from their records; they stay held, not duplicated), then `lists.remove` each of
-  them from the first list. This carries out the package's "LinkedIn only for people without a valid email": dry
-  run, then the real calls, and say what you did. Then two drafts: email + LinkedIn for the first list, LinkedIn only
-  for the second (two drafts mean two Leads links and two Launch buttons in the hand-off). Do the split before the
-  draft: removing someone from a campaign's list later stops them.
+AI dialogue needs it saved (`KNOWLEDGE_REQUIRED`). `knowledge.save` the package's product, offer, FAQ and never-say
+lines. The answer's `limits` win: over a limit, cut
+whole sentences or the last FAQ items (never the offer's numbers) and say what you cut. No links, contact data or
+placeholders, and never a link field. Read back: the revision went up. `VERSION_CONFLICT`: read again, keep what
+changed, save again.
 
-## 4. Templates: how the offer reaches the texts
+## 5. The hand-off: one message, three clicks
 
-The AI writer writes each AI step by a template. Its `instructions` and `example` reach the writer with every text.
-The campaign's knowledge base is used only for replies, not for first messages.
+In this order, each with its link from `campaigns.get` `links`, or its click path:
+1. **Settings:** switch on AI dialogue, and nudges if chosen.
+2. **Leads:** admit the people ("Admit selected"). Admitting sends nothing by itself.
+3. **Launch,** at the top of the campaign.
 
-1. `templates.list`: the workspace's templates by `kind` (`email`, `icebreaker`, `follow_up`, `invite_note`).
-2. `templates.save` (no `id`: a new one) for this campaign, so other campaigns stay as they are. Dry run, then the
-   real call. Only the templates the package's channels use (email + LinkedIn: all four; LinkedIn only: the last
-   two):
-   - `<name>: first email` (`kind: "email"`)
-   - `<name>: email follow-up` (`kind: "email"`)
-   - `<name>: LinkedIn opener` (`kind: "icebreaker"`)
-   - `<name>: LinkedIn follow-up` (`kind: "follow_up"`)
+Add what must happen before Launch: the `readiness` items; the mailbox's sender name, postal address and DNS; an empty
+company profile; the real terms for any open placeholders; the A/B experiment; unused suite items.
 
-   **The suite's starter templates** (only when this chat installed the suite): the LinkedIn opener and follow-up are
-   not new ones. Change the starter `icebreaker` and `follow_up` to these texts with `templates.save` (`id` and
-   `expectedVersion` from `templates.list`, the names above), as in `setup.md`, "The suite's starter items". A
-   refusal because an active campaign uses one (`PERSON_ONLY`): leave it and make a new one for that step.
-   `firstTouchCall`, when the schema lists it: `false` on the opener (the soft first touch: one easy question, no call
-   ask). Never set it to `true` on the opener the campaign's steps use.
-3. Instructions (up to 2000 characters; `example` up to 1200): who we write to, what the product is (Q1), what the
-   partner gets and what we ask for (Q2), "open on one concrete detail about them", a length with margin below
-   Dealmaker's limits (an AI email up to 1200 characters, an AI LinkedIn message up to 600, an invitation note up to
-   180, or 280 with Sales Navigator; a longer text is not used): "under 120 words" for an email, "no more than 450
-   characters, 3 sentences" for a LinkedIn opener or follow-up, the never-say lines (Q4). For follow-ups: "a short,
-   new reason to talk; do not repeat the first message". Only allowed variables (`{{first_name}}`, `{{company}}`,
-   ...); any other `{{...}}` is refused. **No links**: a link in a first touch is refused, and the video and booking
-   links belong to replies.
-4. **No placeholders.** A term still in brackets (`[commission]`, `[payout terms]`, `[deal size]`,
-   `[contract length]`) never goes into a template: leave that line out and say so. When the person gives the real
-   terms before Admit, update the templates (dry run first; it is what the package said).
-5. Templates are final before Admit: changing one later makes texts already written wait for the person's choice,
-   and a template an active campaign uses can only be changed by the person.
-6. **A/B test of a call ask** (only if the package has it, and only if `templates.save` lists `firstTouchCall`): a
-   separate new template `<name>: LinkedIn opener (call)` (`kind: "icebreaker"`, no `id`) with the opener's
-   instructions and `firstTouchCall: true`: the first message then ends with one short question proposing a brief
-   intro call (still no time, link or calendar). The soft opener stays as it is, and the campaign's steps use it. The
-   experiment between the two is the person's: `<origin>/settings/templates` → Experiments → "Start experiment" on
-   the campaign's opener step; no tool starts it. Put it on the launch hand-off's to-do, after the draft exists. A
-   template in a running experiment is refused for changes.
+Then what happens on its own: Dealmaker reads recent LinkedIn posts (up to a day), its AI writes the first messages,
+which go out in the sending windows (auto) or wait on the Queue (manual); follow-ups are written a day before due.
 
-`templates.save` missing: pick the existing template of the right `kind` that fits a partner pitch and say why in
-the report. Then the offer reaches the first messages only through the company profile (the person edits it in
-`<origin>/settings/workspace`).
+Close with: "I need you again only for replies. Ask me 'any replies?' whenever you like. Dealmaker has no auto-send
+for replies." Never promise a schedule.
 
-## 5. Create the draft
+## 6. Check texts not yet sent (on status)
 
-`campaigns.create_draft`, dry run with the whole plan (steps, delays, templates), compare with the package, then the
-real call. It never sends and never launches.
-
-**The suite's starter draft** (only when this chat installed the suite): use it instead of a new draft only if the
-`steps` in its `campaigns.get` answer are exactly the plan's (`setup.md`, "The suite's starter items": type, delay,
-mode, template name and kind, an invitation with no note, no visit). Then
-`campaigns.update` (`id`, `expectedVersion` from `campaigns.get`; `name`, `listIds`, the person's own
-`linkedinSenderId` / `emailSenderIds`, `reviewMode`), dry run, compare, real call, and read `campaigns.get` for
-`readiness` and `links`. Otherwise `campaigns.create_draft` as below, and tell the person the starter draft can be
-deleted in the app; never delete it yourself. A test draft (section 2) is always a new draft.
-
-Arguments (check the schema): `name` (1-150), `listIds`, `channels` (`email`, `linkedin`), `linkedinSenderId`,
-`emailSenderIds` (the person's own, from section 1), `language: "en"` (always, whenever the schema lists `language`,
-even as optional: the AI writes English only; leave it out only when the schema has no such field), `tone`
-(`professional` default), `goal` (`conversations` default), `reviewMode` (the package), `excludeFirstDegree`, `steps` (1-12, in order).
-
-Step fields: `type` (`email`, `invite`, `wait_accept`, `message`, `visit`), `delayDays` (0-60 after the previous
-step), `mode: "ai"` with a `templateId` whose `kind` fits (email → email; message → icebreaker or follow_up; invite
-note → invite_note), no `text`. An email step needs a `subject` (up to 60) even in AI mode; the AI writes each
-person's own subject. `invite` without `text` goes without a note (a note is up to 180 characters, or 280 with
-Sales Navigator, no pitch).
-`wait_accept` with `notAcceptedDays` (1-30, default 14): not accepted in time finishes the person.
-
-**Email + LinkedIn:**
-```
-email     day 0  ai  first email template, subject
-email     +3     ai  email follow-up template, subject
-invite    +2     no note
-wait_accept      notAcceptedDays 14
-message   +1     ai  LinkedIn opener
-message   +4     ai  LinkedIn follow-up
-message   +7     ai  LinkedIn follow-up
-```
-**LinkedIn only:** `invite` day 0 → `wait_accept` 14 → `message` +1 (opener) → +4 → +7 (follow-ups).
-
-- A LinkedIn `message` reaches only people who accepted the invitation (or are already connected), so LinkedIn always
-  starts with `invite` → `wait_accept`. A message before the invitation is refused. (The one exception: a test
-  draft for a colleague already connected, section 2.)
-- **1st-degree connections.** `excludeFirstDegree: true` (default) leaves people already connected to the sender
-  out of the campaign. Set `false` only if the package said to include the person's own connections, and only when
-  the tool's description says such people then skip the invitation and get the messages; an older Dealmaker
-  excludes them anyway when there is an invite step. Say which applies.
-- **Any reply stops the sequence** for that person on every channel, in every campaign. Dealmaker does this.
-
-Answer: `id`, `state: "draft"`, `version`, `readiness` (what still blocks Launch, e.g. "Connect a LinkedIn sender"),
-`links` (`overview`, `leads`, `queue`, `steps`). Keep `readiness` for the hand-off.
-
-A wrong step is refused naming `steps[i]` (`-32602`): fix that step and dry-run again (a fix that changes the plan
-the package showed is a stop). To change a draft's settings later: `campaigns.update` with `expectedVersion` from
-`campaigns.get` (draft only; steps are changed in the app). Apart from reusing the suite's starter draft above, it is
-not in the package, so only when the person asks.
-
-## 6. Save the knowledge base (right after the draft)
-
-The knowledge base is per campaign: what the AI may say about the product and the offer when it drafts replies.
-Dealmaker refuses to switch AI dialogue on until it is saved (`KNOWLEDGE_REQUIRED`), so save it before the hand-off.
-The package's yes covers it: no question.
-
-1. `knowledge.get` (`campaignId`): `aiDialogue`, `revision`, `knowledge` {`product`, `offer`, `faq`, `neverSay`},
-   `company`, `limits`, `link` (the campaign's Settings tab). `revision: 0` and empty fields: none yet.
-2. Build it from the package (Setup Q1, Q2, Q4), exactly as shown there. Limits (the `limits` in the answer win):
-   `product` 1500, `offer` 1000, `faq` up to 12 items (question 200, answer 600), `neverSay` up to 15 lines of 200;
-   6000 in all.
-   - **Too long:** shorten the field to its limit (cut whole sentences or the last FAQ items, never change the
-     offer's numbers), and say in the report exactly what you cut.
-   - **No placeholders:** a term still in brackets (`[commission]`, ...) is left out, never saved; the hand-off
-     keeps "replace the placeholders with real terms" on the to-do, and you save the real terms when they come.
-   - **No links**, email addresses, phone numbers or sensitive data: take them out. **Never send a link field
-     (`loomUrl`, `bookingUrl`, any other URL field), `aiDialogue` or a booking type**, even if an older schema lists
-     them.
-3. `knowledge.save` with `dry_run: true` (if the tool supports it): `campaignId`, `expectedRevision` (the `revision`
-   just read), and only the fields that change (`faq` and `neverSay` replace the whole list). The `changes` match the
-   package (apart from cuts you reported): the same call without `dry_run`. Two campaigns: save it to each.
-4. Read `knowledge.get` again: `revision` went up, the fields are there.
-5. **`knowledge.save` missing:** say so, and put the content into the hand-off: "Paste this on the campaign's
-   Settings tab (<links.settings>) under the knowledge base: Product: ... Offer: ... FAQ: ... Never say: ..." AI
-   dialogue can be switched on only after that.
-
-## 7. The launch hand-off: one message, three links
-
-Read `campaigns.get` (the `version`, `links`, `readiness`) and `knowledge.get` (`company`). Then one message. Fill
-the links from `links` / the `knowledge.get` `link`, else build them (`<origin>/campaigns/view/<id>/settings`,
-`/leads`, `/overview`). Leave out what does not apply (no AI dialogue and no nudges: drop step 1 and renumber).
-
-```
-Your campaign "<name>" is ready, and its knowledge base is saved. Three clicks are yours, in this order:
-
-1. Settings: switch on "AI dialogue for this campaign"<, and "Draft nudges for silent conversations">.
-   <settings link>
-   It works now because the knowledge base is saved.<If the tab has a "Booking meeting type" field: set it to
-   "<meeting type name>".>
-2. Leads: admit the people. Tick them and click "Admit selected" (or admit all).
-   <leads link>
-   <n> people are waiting. Admitting sends nothing by itself.
-3. Launch: the "Launch" button at the top of the campaign.
-   <overview link>
-
-<Before Launch, please also: <readiness items / empty company profile / mailbox sender name, postal address, DNS>,
-each with its link. Launch is refused until they are done.> <Tell me the real terms for <[commission], ...>: the
-templates and the knowledge base leave them out until then.> <A/B test: <origin>/settings/templates → Experiments →
-"Start experiment" on this campaign's opener step, with "<soft opener>" and "<call opener>".> <From the suite, not
-used: <the starter draft "<name>" (<link>) | the invitation-note template "<name>" | the starter list "<name>">.
-Nothing goes out from them unless someone launches the starter draft<; it uses your campaign's list, so please
-don't>. You can delete them in Dealmaker if you don't need them.>
-
-What happens next, on its own: Dealmaker reads each person's recent LinkedIn posts (up to a day), its AI writes the
-first messages from your templates, and <they go out in your accounts' sending windows without your approval |
-each one waits for your approval on the Queue tab: <queue link>>. Follow-ups are written about a day before they are
-due. A reply on any channel stops that person's sequence. You can ask me "status" any time: I check the texts not
-yet sent and fix small things.
-
-I need you again only for replies. Ask me "any replies?" whenever you like: I read the Inbox, improve the AI's reply
-drafts (demo video, your personal booking link) and give you one list to approve and send. Dealmaker has no
-auto-send for replies, so each one needs your click.
-```
-
-You never press any of these. No tool admits people or launches; AI dialogue and nudges are person-only switches
-(`PERSON_ONLY`, `-32003`). Two drafts (the split in section 3): one hand-off with the Leads and Launch links of both.
-
-After Admit, Dealmaker reads each person's recent LinkedIn posts through the campaign's LinkedIn account (free, about
-50 people a day per account; the rest are written without posts after 24 hours), then the AI writes the first
-touches: the first email, the invitation note and the first LinkedIn message.
-
-**Follow-ups.** If follow-ups stay `preparing` while the first touches are `ready`, this Dealmaker writes each
-follow-up about a day before it is due, with the earlier texts in view. In manual review the person then has about a
-day to approve each follow-up; nothing goes out unapproved. Tell them. If all texts of a person are written at once
-(an older Dealmaker), the follow-ups were written as first messages: check that each reads as a follow-up and fix
-it.
-
-## 8. Check the texts not yet sent (on status or "texts ready?")
-
-`campaigns.messages.list` (`campaignId`, `limit` up to 50 people; follow `cursor`; `state` filter optional).
-States: `preparing` (not written yet; `waitingFor: "research"` with `researchUntil` while the LinkedIn read runs; a
-held person shows `preparing` too), `ready` (written; with manual review it waits for approval), `needs_edit`
-(`invalidReason`), `approved`, `sent`. Keep `id` and `revision` for edits. With `auto`, a written text goes out when
-due, so check the texts not yet sent first.
-
-For each text, read the person (`prospects.get`: `research`, `linkedinActivity`) and check:
-- every fact is in their research, posts or profile; nothing invented;
+Read `campaigns.messages.list`. For each text not yet sent, read the person (`prospects.get`) and check:
+- every fact is in their research, posts or profile, and is professional (nothing about personal life, health,
+  family, politics or religion);
 - the offer and the ask match the package; nothing from the never-say lines;
-- the LinkedIn opener does not repeat the email's opening; each follow-up adds something new;
-- limits: an AI email up to 1200 characters, an AI LinkedIn message up to 600, an invitation note up to 180 (280
-  with Sales Navigator), a subject up to 60; no placeholders or brackets; no link in a first touch; does not start
-  with "I" or the person's name; English.
+- no link or placeholder in a first touch; within the length limits; follow-ups add something new;
+- the greeting uses a real first name (see "First names": a yes before any fix).
 
-**Edits inside the package go ahead without asking:** removing an invented fact, a never-say line or a link, fixing
-the offer to the package's words, length, placeholders, a follow-up that repeats the first message. Use
-`campaigns.messages.edit` per text (`messageId`, `expectedRevision`, `text`, `subject` for an email). A final text:
-no `{{variables}}`. Keep a text you edit within the limits above (a LinkedIn message up to 600 characters, not
-LinkedIn's own 1900). Report each edit as before/after in the status message. A change of tone, angle or offer
-that the package did not cover: propose it and wait for a yes.
+Fix the rest with `campaigns.messages.edit` without asking and report each fix before and after; a change of tone,
+angle or offer waits for a yes. An edit never approves; an approved or sent text is the person's.
 
-An edit **never approves**. A text the person already approved is theirs (refused). A text already sent cannot be
-changed. `needs_edit` with `BUSINESS_PROFILE_MISSING` on every text: the company profile is empty; give the person
-`<origin>/settings/workspace`.
+Special states (never rewrite or retry these yourself):
+- **A text waits for approval, even in auto mode** (for example, one with no personal hook): list it with the Queue
+  link.
+- **`needs_edit` with `REQUIRES_EDIT:<codes>`** (`length`, `placeholder`, `name_start`, ...): fix that step's
+  template (once active, give the person the new instruction); then the person presses Regenerate in the Queue.
+- **`needs_edit` with `provider_error`:** the AI writer could not reach its model; the text is empty. Report it as an
+  app problem (people who accept get no first message until it is written). Never write it yourself.
+- **`BUSINESS_PROFILE_MISSING` on every text:** the person fills in the company profile.
+- **An approved text stays queued for a lead in some country:** a country rule in the app may hold messages to some
+  countries. Say so and point to the lead; do not retry.
 
-`needs_edit` with `invalidReason: REQUIRES_EDIT:<codes>` (e.g. `REQUIRES_EDIT:length`): the AI writer wrote the
-text, but it broke a rule and is not used. Codes: `length` (over the limits above), `placeholder`, `name_start`
-(starts with "I" or the person's name), `subject`, and copy or phrase checks. Fix the cause in that step's template
-(`length`: ask for a shorter text, e.g. "no more than 450 characters, 3 sentences" for a LinkedIn message): before
-Launch, `templates.save` yourself (dry run first); once the campaign is active, the template is the person's, so give
-them the new instruction to paste. Then the person presses "Regenerate" on that text in the Queue
-(<links.queue>); no tool makes the AI write again. Tell the person which texts and why.
+## 7. After Launch
 
-`needs_edit` with `invalidReason: provider_error` (often every first AI message at once, right after Launch, with an
-empty text; the invite step `ready`, follow-ups `preparing`): Dealmaker's AI writer could not reach its model. It is
-an app or platform problem, not the person's data. An older Dealmaker also shows `provider_error` for a text that
-broke a rule (most often a LinkedIn message over 600 characters): if the template does not ask for a short text,
-handle it as `REQUIRES_EDIT:length` above first. Otherwise tell the person plainly: invitations still go out, but
-anyone who accepts gets no first message until the text is written; ask them to report it to whoever runs their
-Dealmaker or Beyonder. Do not write the text yourself with `campaigns.messages.edit` (Dealmaker's AI writer writes
-these texts), and no tool makes it write again. Read `campaigns.messages.list` again on the next status.
+Dealmaker sends in each account's window and limits, and adds the email footer. Pause a campaign or a sender only
+when asked; resuming and raising limits are the person's (`PERSON_ONLY`).
 
-With manual review, end with the Queue link: "<n> messages wait for your approval: <links.queue> → each person's
-'Review messages' → 'Approve' or 'Approve selected'."
+## Test run (only if the package has one)
 
-## 9. After Launch
+A one-person list and its own small draft, before the main one. A colleague already connected to the sender is left
+out: if the package includes connections, the test draft alone has no invitation step and includes them; otherwise
+say the LinkedIn part is not tested. Tell the person whether the test person was left out. The main hand-off comes
+after the test looked right.
 
-Dealmaker sends by itself: each account only on its active days, in its sending window, within weekly and daily
-limits that start low for new accounts (warm-up). Emails go only to a usable address, from a mailbox with a sender
-name, postal address and passing DNS; Dealmaker adds the footer (name, postal address, unsubscribe link). You never
-write a footer. Lowering an account's limits or turning days off: `senders.setLimits`, `senders.setSchedule` (only
-lower or keep), only when the person asks. Raising them is the person's.
+## Older Dealmaker versions
 
-**Stopping.** When the person asks: `campaigns.pause` (`id`, `expectedVersion`). It may open a pause job: follow
-`campaigns.jobs.get` until `ready`, then `campaigns.jobs.confirm` with its `expectedRevision`,
-`expectedScanRevision` and `confirmed: true`. One account only: `senders.pause`. Resuming is the person's, in the app.
-
-## Fixed text instead of the AI writer (only if the person asks)
-
-Not in the package: the person supplies the text; you may suggest edits; each change waits for their yes. Fixed
-steps (`mode: "fixed"`, `text`) may use `{{first_name}}`, `{{last_name}}`, `{{company}}`, `{{job_title}}`,
-`{{custom.<key>}}` with `fallbacks`. A personal first line per person only when the person asks for it: one plain
-sentence under 200 characters from the title, company and saved research; the person approves each; stored as
-`custom.first_line` through `prospects.import` (check its `custom` limits) and used as `{{custom.first_line}}` with a
-neutral fallback. The AI writer never reads custom fields.
-
-## Done
-
-The hand-off is sent. After the person's Launch, `campaigns.get` shows the campaign active. Progress report, then
-Engage and Book when the person asks.
+- Pass `language: "en"` whenever the draft's schema lists it.
+- `knowledge.save` may still list link fields: never send them.
+- The draft tool does not say an email step is skipped without a usable email: before the draft, move those people
+  to a list "<name> (LinkedIn only)" (`prospects.import`, `lists.remove`) and make two drafts.
+- `provider_error` can also mean a text over its limit. If the template does not ask for a short text, treat it as
+  `REQUIRES_EDIT:length` first.
