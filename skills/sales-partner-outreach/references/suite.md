@@ -33,7 +33,8 @@ one:
 - each AI message step naming the template you just saved for it.
 
 A plan with email steps never matches, and an answer without `steps` cannot be confirmed. To reuse it, call
-`campaigns.update` (`id`, `expectedVersion`) with only the name, the list, the person's accounts and the review mode.
+`campaigns.update` (`id`, `expectedVersion`) with only the name, the list, the person's accounts and
+`reviewMode: "manual"` (never `auto`: only the person switches a campaign to automatic).
 Otherwise make the run's own draft. Tell the person the starter draft can be deleted in Dealmaker, and that it must
 not be launched if it uses the same list.
 

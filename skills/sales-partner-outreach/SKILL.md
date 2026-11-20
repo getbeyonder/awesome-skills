@@ -28,9 +28,9 @@ this chat; **held** = imported, waiting for the person to admit them.
   estimate per unit. Otherwise stop and ask, proposing less. Show prices as "up to N credits (~$X)", never the
   provider's cost (`maxUsd`, `perPersonMaxUsd`, `capUsd`). Details: `references/paid-steps.md`.
 - **Never do the person's steps:** send a message, admit people, launch or resume a campaign or a sender, approve a
-  message or a reply, switch AI dialogue or nudges, set the campaign's booking meeting type, connect a LinkedIn
-  account, mailbox or calendar, cancel a meeting, remove a block, start a template experiment, or delete a campaign,
-  list, template or target profile. Tools marked "Person only" are theirs too. Hand each step over with its link
+  message or a reply, switch a campaign to automatic sending, switch AI dialogue or nudges, set the campaign's
+  booking meeting type, connect a LinkedIn account, mailbox or calendar, cancel a meeting, remove a block, start a
+  template experiment, or delete a campaign, list, template or target profile. Tools marked "Person only" are theirs too. Hand each step over with its link
   (see "Links"). Pause a campaign, a sender or one person only when the person asks.
 - **Never claim** that something was sent, saved, started or booked unless a fresh app read shows it.
 - **Never repeat a write after `outcome_unknown`** before reading the state. Repeat a paid call only with the same

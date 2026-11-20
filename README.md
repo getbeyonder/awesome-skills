@@ -45,7 +45,7 @@ To update a skill, copy its folder again.
 
 | Skill | What it does | Apps it uses |
 |---|---|---|
-| [`sales-partner-outreach`](skills/sales-partner-outreach/SKILL.md) | Finds sales or reseller partners in the US for your product and brings them to a call. Asks five setup questions, takes one approval package with a credit budget, then runs people search, email lookup, research, a draft campaign, reply drafts with booking links and booking status. You admit, launch, switch AI dialogue and approve replies. | Dealmaker, Booking, AI CRM |
+| [`sales-partner-outreach`](skills/sales-partner-outreach/SKILL.md) | Finds sales or reseller partners in the US for your product and brings them to a call. Asks five setup questions, takes one approval package with a credit budget, then runs people search, email lookup, research, a draft campaign, reply drafts with booking links and booking status. You admit, launch, approve messages (or switch the campaign to automatic yourself), switch AI dialogue and approve replies. | Dealmaker, Booking, AI CRM |
 
 More skills are on the way.
 

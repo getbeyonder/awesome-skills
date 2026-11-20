@@ -84,7 +84,7 @@ The package shows these, and the person can change any of them with a reply.
 | Channels | Email first, then LinkedIn, only if email lookup is on and a mailbox is connected; marked "not yet tested live". Otherwise LinkedIn only, with no email lookups in the budget |
 | Accounts | The person's own connected accounts |
 | Campaign name | "US partners: <type> <size> (<channels>)". Texts are in English |
-| Review mode | Auto: each text goes out when due. Manual means the person approves every message on the Queue; a text not approved in time is not sent, which can leave LinkedIn messages unsent |
+| Review mode | Manual: every message waits on the Queue until the person approves it, then goes out in the account's sending window. Only the person can switch the campaign to automatic (campaign Settings → Message review → Automatic); you never set it |
 | AI dialogue | On for a test run. The person switches it on at Launch, and still approves every reply |
 | Nudges | Off |
 | Hours | Booking's current hours |
