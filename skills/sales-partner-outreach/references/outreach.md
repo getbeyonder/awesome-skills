@@ -30,8 +30,9 @@ about them", the never-say lines; follow-ups: "a short, new reason to talk; do n
 
 ## 3. The draft
 
-`campaigns.create_draft` with the package's name, list, channels, the person's own accounts, review mode and steps
-(it never sends):
+`campaigns.create_draft` with the package's name, list, channels, the person's own accounts and steps (it never
+sends). Leave `reviewMode` out: the draft is manual. `reviewMode: "auto"` from you is refused (`PERSON_ONLY`); never
+retry it.
 - **Email + LinkedIn:** email on day 0 → email +3 → LinkedIn invitation +2 → wait up to 14 days for acceptance →
   message +1 (opener) → +4 → +7 (follow-ups). An email step needs a subject; the AI writes each person's own.
 - **LinkedIn only:** invitation on day 0 → wait 14 days → message +1 → +4 → +7.
@@ -53,9 +54,13 @@ changed, save again.
 ## 5. The hand-off: one message, three clicks
 
 In this order, each with its link from `campaigns.get` `links`, or its click path:
-1. **Settings:** switch on AI dialogue, and nudges if chosen.
+1. **Settings:** switch on AI dialogue, and nudges if chosen. Message review stays "Human approval"; the person may
+   choose "Automatic" there so texts go out without approving each one.
 2. **Leads:** admit the people ("Admit selected"). Admitting sends nothing by itself.
 3. **Launch,** at the top of the campaign.
+
+With human approval, say also: after Launch each message waits on the **Queue** ("Review messages" → "Approve this
+message", or "Approve selected"), with its link. Nothing goes out until they approve.
 
 Add what must happen before Launch: the `readiness` items; the mailbox's sender name, postal address and DNS; an empty
 company profile; the real terms for any open placeholders; the A/B experiment; unused suite items.
